@@ -18,7 +18,8 @@ jobs:
 
       - name: Claude plugin validation
         run: |
-          npm install --global --no-fund --no-audit @anthropic-ai/claude-code@2.1.295
+          # 2.1.305 is the first release with `plugin validate --profile directory`
+          npm install --global --no-fund --no-audit @anthropic-ai/claude-code@2.1.305
           claude plugin validate .claude-plugin/plugin.json --strict
           claude plugin validate .claude-plugin/marketplace.json --strict
           claude plugin validate . --strict --profile directory
