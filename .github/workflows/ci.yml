@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Claude plugin validation
+        run: |
+          npm install --global --no-fund --no-audit @anthropic-ai/claude-code@2.1.295
+          claude plugin validate .claude-plugin/plugin.json --strict
+          claude plugin validate .claude-plugin/marketplace.json --strict
+          claude plugin validate . --strict --profile directory
+
+      - name: Manifests agree and point at the EconDash server only
+        run: |
+          set -euo pipefail
+          jq -e '. == {"mcpServers": {"econdash": {"type": "http", "url": "https://mcp.econdash.org/mcp"}}}' .mcp.json \
+            || { echo "::error file=.mcp.json::must declare exactly one server: econdash, type http, url https://mcp.econdash.org/mcp"; exit 1; }
+          jq -e '
+            (keys - ["name", "version", "description", "mcpServers", "contextFileName"]) == []
+            and .name == "econdash"
+            and (.version | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))
+            and (.description | type == "string" and length > 0)
+            and .mcpServers == {"econdash": {"httpUrl": "https://mcp.econdash.org/mcp"}}
+            and .contextFileName == "GEMINI.md"
+          ' gemini-extension.json \
+            || { echo "::error file=gemini-extension.json::unexpected keys or values"; exit 1; }
+          jq -e '.name == "econdash" and .plugins == [.plugins[0]] and .plugins[0].name == "econdash" and .plugins[0].source == "./"' .claude-plugin/marketplace.json \
+            || { echo "::error file=.claude-plugin/marketplace.json::must list exactly one plugin, econdash, at ./"; exit 1; }
+          claude_version=$(jq -r .version .claude-plugin/plugin.json)
+          gemini_version=$(jq -r .version gemini-extension.json)
+          [ "$claude_version" = "$gemini_version" ] \
+            || { echo "::error::plugin.json version $claude_version differs from gemini-extension.json version $gemini_version"; exit 1; }
+          grep -q "^## $claude_version\$" CHANGELOG.md \
+            || { echo "::error file=CHANGELOG.md::no section for version $claude_version"; exit 1; }
+
+      - name: Nothing executable, no symlinks, submodules or LFS
+        run: |
+          set -euo pipefail
+          bad=$(git ls-files -s | awk '$1 != "100644" {print $4}')
+          [ -z "$bad" ] || { echo "::error::only regular non-executable files are allowed:"; echo "$bad"; exit 1; }
+          bad=$(git ls-files | grep -v '^\.github/' | grep -E '(^|/)(hooks|scripts|bin|commands|agents)/|\.(sh|bash|zsh|ps1|bat|cmd|py|js|mjs|cjs|ts|rb|pl|exe|dll|so|dylib|mcpb|dxt|zip|jar)$' || true)
+          [ -z "$bad" ] || { echo "::error::executable content is not allowed in the plugin:"; echo "$bad"; exit 1; }
+          bad=$(git ls-files | grep -E '(^|/)(\.DS_Store|Thumbs\.db|desktop\.ini|__MACOSX)(/|$)|(^|/)\.(npmrc|yarnrc|yarnrc\.yml)$|(^|/)(bunfig|uv)\.toml$' || true)
+          [ -z "$bad" ] || { echo "::error::junk or package-manager config files:"; echo "$bad"; exit 1; }
+          if git ls-files '*.gitattributes' | xargs -r grep -nE 'export-ignore|export-subst|filter='; then
+            echo "::error::.gitattributes must not use export-ignore, export-subst or filter"; exit 1
+          fi
+
+      - name: No images in skills
+        run: |
+          bad=$(git ls-files 'skills/*' | grep -iE '\.(png|jpe?g|gif|webp|svg|bmp|ico|tiff?|avif|heic)$' || true)
+          [ -z "$bad" ] || { echo "::error::images are not allowed in skills/ (keep listing screenshots elsewhere):"; echo "$bad"; exit 1; }
+
+      - name: No hidden Unicode
+        shell: python3 {0}
+        run: |
+          import subprocess, sys
+          ranges = [
+              (0xE0000, 0xE007F, "tag character"),
+              (0x200B, 0x200F, "zero-width or direction mark"),
+              (0x202A, 0x202E, "bidi embedding or override"),
+              (0x2060, 0x2064, "invisible operator"),
+              (0x2066, 0x2069, "bidi isolate"),
+              (0x061C, 0x061C, "arabic letter mark"),
+              (0x00AD, 0x00AD, "soft hyphen"),
+              (0xFEFF, 0xFEFF, "zero-width no-break space"),
+          ]
+          failed = False
+          for path in subprocess.run(["git", "ls-files"], capture_output=True, text=True, check=True).stdout.splitlines():
+              data = open(path, "rb").read()
+              if b"\0" in data:
+                  continue  # binary file
+              for lineno, line in enumerate(data.decode("utf-8").splitlines(), 1):
+                  for col, ch in enumerate(line, 1):
+                      for lo, hi, kind in ranges:
+                          if lo <= ord(ch) <= hi:
+                              print(f"::error file={path},line={lineno},col={col}::hidden Unicode U+{ord(ch):04X} ({kind})")
+                              failed = True
+          sys.exit(1 if failed else 0)
+
+      - name: README and context files install nothing else
+        run: |
+          if git ls-files '*.md' | xargs -r grep -nEi '(curl|wget)[^|]*\|[[:space:]]*(sudo[[:space:]]+)?(ba|z)?sh|\b(npm|pnpm|yarn|bun)[[:space:]]+(i|install|add)\b|\bnpx[[:space:]]|\b(pip|pip3|pipx|uv)[[:space:]]+(install|add|run)\b|\buvx[[:space:]]|\bbrew[[:space:]]+install\b'; then
+            echo "::error::documentation must only use the platforms' own plugin install commands"; exit 1
+          fi
+
+      - name: README is long enough
+        shell: python3 {0}
+        run: |
+          import re, sys
+          text = open("README.md", encoding="utf-8").read()
+          text = re.sub(r"^```.*?^```", " ", text, flags=re.S | re.M)
+          text = re.sub(r"`[^`]*`", " ", text)
+          words = len(re.findall(r"[A-Za-z0-9][A-Za-z0-9'.-]*", text))
+          print(f"README words outside code: {words}")
+          sys.exit(0 if words >= 40 else 1)
+
+      - name: Skills stay neutral
+        run: |
+          [ -d skills ] || { echo "no skills yet"; exit 0; }
+          if grep -rnEi '\bclaude\b|\banthropic\b|\bchatgpt\b|\bopenai\b|\bgemini\b|\bgrok\b|always use|you must use|ignore (all|previous|prior)|do not (tell|mention)|checkout|pricing|upgrade|subscri|x402|payment|wallet' skills; then
+            echo "::error::skills must be provider-neutral, must not steer the model to always use EconDash, and must not mention payments"; exit 1
+          fi
+
+      - name: Actions pinned by commit SHA
+        run: |
+          if grep -rnE '^\s*-?\s*uses:' .github/workflows | grep -vE 'uses:\s*[^@[:space:]]+@[0-9a-f]{40}(\s|$)'; then
+            echo "::error::pin every action to a full commit SHA"; exit 1
+          fi
+
+      - name: No secrets (gitleaks)
+        run: |
+          set -euo pipefail
+          version=8.30.1
+          sha256=551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+          curl -sSfL -o gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_linux_x64.tar.gz"
+          echo "${sha256}  gitleaks.tar.gz" | sha256sum --check
+          tar -xzf gitleaks.tar.gz gitleaks
+          ./gitleaks git --redact --verbose .
