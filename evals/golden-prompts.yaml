@@ -489,6 +489,13 @@ prompts:
         values.2022-12:
         - 2.5603333
         - 0.05
+  - tool: get_indicator_series
+    args:
+      indicator: euribor-6-month
+      country: EUU
+      year: 2022
+    expect:
+      error: 'has data only for: EUR'
   answer: The December 2022 monthly average of 6-month EURIBOR in %, source ECB.
 - id: indirect-nasdaq-end-2023
   kind: indirect
