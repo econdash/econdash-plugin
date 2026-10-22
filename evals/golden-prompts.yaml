@@ -943,6 +943,13 @@ prompts:
     expect:
       contains:
         results: '"brent-oil"'
+  - tool: search_indicators
+    args:
+      query: oil
+      limit: 3
+    expect:
+      contains:
+        results: '"brent-oil"'
   - tool: get_indicator_series
     args:
       indicator: brent-oil
@@ -1365,6 +1372,113 @@ prompts:
     expect:
       error: No data for
   answer: EconDash has only US mortgage rates; the answer says so in Russian.
+- id: ru-japan-exchange-rate-2024
+  kind: indirect
+  lang: ru
+  category: financial markets
+  source: manual
+  prompt: Какой был средний курс иены к доллару в 2024 году?
+  call: true
+  checks:
+  - tool: search_indicators
+    args:
+      query: exchange rate
+    expect:
+      contains:
+        results: '"exchange-rate-lcu-per-usd"'
+  - tool: get_indicator_series
+    args:
+      indicator: exchange-rate-lcu-per-usd
+      country: JPN
+      year: 2024
+    expect:
+      approx:
+        values.2024:
+        - 151.366291302751
+        - 0.02
+  answer: About 151 yen per US dollar on average in 2024, source World Bank, in Russian; not foreign exchange reserves.
+- id: ru-gold-price-2024
+  kind: indirect
+  lang: ru
+  category: commodities and energy
+  source: manual
+  prompt: Сколько стоило золото в конце 2024 года?
+  call: true
+  any_country: true
+  checks:
+  - tool: search_indicators
+    args:
+      query: gold price
+    expect:
+      contains:
+        results: '"gold"'
+  - tool: get_indicator_series
+    args:
+      indicator: gold
+      country: GLB
+      year: 2024
+    expect:
+      approx:
+        values.2024-12:
+        - 2648.0
+        - 0.02
+  answer: About 2,650 US dollars per troy ounce in December 2024 (monthly average, World Bank Pink Sheet), in Russian.
+- id: ru-eu-hicp-2022
+  kind: indirect
+  lang: ru
+  category: macroeconomics
+  source: manual
+  prompt: Какой была инфляция HICP в Евросоюзе в декабре 2022 года?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: eu-hicp-inflation
+      country: EUU
+      year: 2022
+    expect:
+      approx:
+        values.2022-12:
+        - 10.4
+        - 0.02
+  - tool: get_indicator_series
+    args:
+      indicator: eu-hicp-inflation
+      country: EUR
+      year: 2022
+    expect:
+      error: 'has data only for: EUU'
+  - tool: list_countries
+    args: {}
+    expect:
+      contains:
+        notes.EUU: EU-27
+  answer: 10.4% year on year for the EU-27 (code EUU, Eurostat), in Russian; the euro area is a different aggregate.
+- id: ru-germany-ppi-2023
+  kind: indirect
+  lang: ru
+  category: macroeconomics
+  source: manual
+  prompt: Какой был индекс цен производителей (PPI) в Германии в конце 2023 года?
+  call: true
+  checks:
+  - tool: search_indicators
+    args:
+      query: ppi
+    expect:
+      contains:
+        results: '[{"slug": "ppi-producer-price-index"'
+  - tool: get_indicator_series
+    args:
+      indicator: ppi-producer-price-index
+      country: DEU
+      year: 2023
+    expect:
+      approx:
+        values.2023-Q4:
+        - 123.0
+        - 0.02
+  answer: About 123 (2021=100) in Q4 2023, source Eurostat, in Russian.
 - id: ru-negative-what-is-inflation
   kind: negative
   lang: ru
