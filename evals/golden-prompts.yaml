@@ -1,0 +1,1365 @@
+# Golden prompt set for the EconDash plugin.
+#
+# Real questions, mostly from Google Search Console queries for econdash.org, that check
+# whether a model calls EconDash when it should (recall) and leaves it alone when it
+# should not (precision). The same set is used on every platform, so results compare.
+#
+# Fields
+#   kind       direct   - the user names EconDash
+#              indirect - the user asks for data without naming a tool
+#              negative - EconDash must not be called
+#              edge     - missing country, year, indicator or history; the answer must not invent numbers
+#   call       true: an EconDash tool is expected; false: none; optional: either is fine
+#   checks     the data calls a correct answer rests on (search_indicators may come first).
+#              tool and args are what a good model sends; expect is checked against the live
+#              server, values recorded on 2026-10-22 with a relative tolerance for revisions.
+#   also_ok    other indicator slugs that answer the question as well
+#   answer     what a correct answer says
+#   signed_in  how the answer differs for a user signed in to EconDash (full history);
+#              everything else is the same for anonymous and signed-in users
+#   known_gap  a server problem the model has to work around today
+#
+# Grading a model run, per prompt: called = any EconDash tool was called.
+#   recall    = prompts with call: true where it called / all prompts with call: true
+#   precision = prompts where it called that have call: true or optional / all prompts where it called
+#   accuracy  = of the expected calls, those where a data tool, indicator (checks or also_ok)
+#               and country match; for edge prompts the answer must state the gap instead of a number.
+#
+# The expected values are re-checked against the live server and the chart pages on
+# econdash.org before each release.
+
+prompts:
+- id: direct-germany-gdp-growth-10y
+  kind: direct
+  lang: en
+  category: macroeconomics
+  source: manual
+  prompt: Use EconDash to get Germany's GDP growth for the last ten years.
+  call: true
+  also_ok:
+  - real-gdp-growth
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: gdp-growth-annual-percent
+      country: DEU
+      start_year: 2016
+    expect:
+      approx:
+        values.2016:
+        - 2.22222216259371
+        - 0.05
+        values.2021:
+        - 3.90999994204108
+        - 0.05
+        values.2025:
+        - 0.239578342117881
+        - 0.05
+  answer: Annual real GDP growth for Germany 2016-2025 with the 2020 contraction, source World Bank and the chart
+    link.
+- id: direct-japan-cpi
+  kind: direct
+  lang: en
+  category: macroeconomics
+  source: manual
+  prompt: What does EconDash say about Japan's CPI inflation?
+  call: true
+  also_ok:
+  - cpi-inflation-rate-percent
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: cpi-inflation
+      country: JPN
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2025:
+        - 3.2
+        - 0.03
+      last_key_at_least:
+        values: '2025'
+  answer: Latest observed annual CPI inflation for Japan with its year; an IMF projection, if mentioned, is called
+    a projection.
+- id: direct-singapore-gdp-per-capita
+  kind: direct
+  lang: en
+  category: macroeconomics
+  source: 'gsc: singapore gdp per capita'
+  prompt: Using EconDash, what is Singapore's GDP per capita?
+  call: true
+  also_ok:
+  - gdp-per-capita-imf
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: gdp-per-capita
+      country: SGP
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2025:
+        - 98813.9788172877
+        - 0.03
+      last_key_at_least:
+        values: '2025'
+  answer: Latest GDP per capita of Singapore in current USD with its year and source.
+- id: direct-uk-debt-to-gdp
+  kind: direct
+  lang: en
+  category: macroeconomics
+  source: 'gsc: uk debt to gdp'
+  prompt: Get the UK's government debt to GDP ratio from EconDash.
+  call: true
+  also_ok:
+  - gross-government-debt
+  - central-government-debt-percent-of-gdp
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: government-debt-percent-gdp
+      country: GBR
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2024:
+        - 130.735888365813
+        - 0.05
+      last_key_at_least:
+        values: '2024'
+  answer: UK government debt as % of GDP for the latest year, with source.
+  known_gap: search_indicators returns no match for 'debt to gdp'; the model has to retry with 'government debt'.
+- id: direct-search-house-prices
+  kind: direct
+  lang: en
+  category: real estate
+  source: manual
+  prompt: Search EconDash for indicators on house prices.
+  call: true
+  checks:
+  - tool: search_indicators
+    args:
+      query: house price
+    expect:
+      contains:
+        results: '"house-price-index-hpi"'
+  answer: Lists the matching indicators, at least the US house price index (S&P Case-Shiller via FRED).
+- id: direct-coverage
+  kind: direct
+  lang: en
+  category: catalogue
+  source: manual
+  prompt: Which countries and regions does EconDash cover?
+  call: true
+  checks:
+  - tool: list_countries
+    args: {}
+    expect:
+      contains:
+        regions: '"WLD"'
+      at_least:
+        countries: 200
+  answer: 'Summarises the list: about 220 countries and about 80 regional aggregates such as WLD and EUU, as ISO3
+    codes.'
+- id: direct-life-expectancy-licence
+  kind: direct
+  lang: en
+  category: healthcare
+  source: manual
+  prompt: What is the source and licence of EconDash's life expectancy data?
+  call: true
+  checks:
+  - tool: get_indicator_details
+    args:
+      indicator: life-expectancy-at-birth
+    expect:
+      equals:
+        source: World Bank
+        license: CC BY 4.0
+        unit: years
+  answer: Source World Bank and its licence as returned by the tool, with attribution text.
+- id: direct-sex-ratio-tur-ukr-isr
+  kind: direct
+  lang: en
+  category: demographics
+  source: 'gsc: turkey / ukraine / israel sex ratio'
+  prompt: Use EconDash to compare the sex ratio at birth in Turkey, Ukraine and Israel.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: sex-ratio-m-f
+      countries:
+      - TUR
+      - UKR
+      - ISR
+    expect:
+      approx:
+        values.TUR.value:
+        - 1.05
+        - 0.03
+        values.UKR.value:
+        - 1.062
+        - 0.03
+        values.ISR.value:
+        - 1.055
+        - 0.03
+      equals:
+        values.TUR.period: '2024'
+        values.UKR.period: '2024'
+        values.ISR.period: '2024'
+  answer: Male births per female birth for the three countries for the latest year, with the year.
+- id: direct-brent-end-2020
+  kind: direct
+  lang: en
+  category: commodities and energy
+  source: manual
+  prompt: With EconDash, what was the Brent oil price at the end of 2020?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: brent-oil
+      country: GLB
+      year: 2020
+    expect:
+      approx:
+        values.2020-12-31:
+        - 51.22
+        - 0.03
+  answer: Brent price in USD per barrel on the last trading day of 2020, source EIA.
+- id: direct-nigeria-literacy
+  kind: direct
+  lang: en
+  category: education
+  source: 'gsc: nigeria literacy rate 2026'
+  prompt: According to EconDash, what is the adult literacy rate in Nigeria?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: literacy-rate-adult
+      country: NGA
+    expect:
+      approx:
+        values.2024:
+        - 70.4100036621094
+        - 0.05
+      last_key_at_least:
+        values: '2024'
+  answer: Latest adult literacy rate for Nigeria with its year; does not claim a 2026 value.
+- id: direct-brazil-tfr-2000-2024
+  kind: direct
+  lang: en
+  category: demographics
+  source: 'gsc: brazil tfr'
+  prompt: Pull Brazil's total fertility rate from EconDash for 2000 to 2024.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: total-fertility-rate-tfr
+      country: BRA
+      start_year: 2000
+      end_year: 2024
+    expect:
+      approx:
+        values.2000:
+        - 2.247
+        - 0.03
+        values.2012:
+        - 1.766
+        - 0.03
+        values.2024:
+        - 1.614
+        - 0.03
+  answer: Births per woman in Brazil 2000-2024, falling from about 2.3 to about 1.6.
+- id: direct-us-unemployment-2024
+  kind: direct
+  lang: en
+  category: labor
+  source: manual
+  prompt: Check EconDash for the US unemployment rate in 2024.
+  call: true
+  also_ok:
+  - unemployment-rate
+  - unemployment-ilo-estimates
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: unemployment-rate-u3
+      country: USA
+      year: 2024
+    expect:
+      approx:
+        values.2024:
+        - 4.022
+        - 0.05
+  answer: US unemployment rate for 2024 in %, with source.
+- id: indirect-spain-italy-unemployment-2008
+  kind: indirect
+  lang: en
+  category: labor
+  source: manual
+  prompt: Compare unemployment in Spain and Italy since 2008.
+  call: true
+  also_ok:
+  - unemployment-rate
+  - unemployment-ilo-estimates
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: unemployment-rate-u3
+      country: ESP
+      start_year: 2008
+    expect:
+      approx:
+        values.2008:
+        - 11.254
+        - 0.05
+        values.2017:
+        - 17.224
+        - 0.05
+        values.2025:
+        - 10.376
+        - 0.05
+  - tool: get_indicator_series
+    args:
+      indicator: unemployment-rate-u3
+      country: ITA
+      start_year: 2008
+    expect:
+      approx:
+        values.2008:
+        - 6.723
+        - 0.05
+        values.2017:
+        - 11.211
+        - 0.05
+        values.2025:
+        - 6.391
+        - 0.05
+  answer: Both series from 2008 with the peaks around 2013 and the decline since.
+- id: indirect-g7-highest-debt
+  kind: indirect
+  lang: en
+  category: macroeconomics
+  source: manual
+  prompt: Which G7 country has the highest government debt to GDP?
+  call: true
+  also_ok:
+  - government-debt-percent-gdp
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: gross-government-debt
+      countries:
+      - CAN
+      - FRA
+      - DEU
+      - ITA
+      - JPN
+      - GBR
+      - USA
+    expect:
+      approx:
+        values.CAN.value:
+        - 113.6
+        - 0.03
+        values.FRA.value:
+        - 115.5
+        - 0.03
+        values.DEU.value:
+        - 62.7
+        - 0.03
+        values.ITA.value:
+        - 137.1
+        - 0.03
+        values.JPN.value:
+        - 204.8
+        - 0.03
+        values.GBR.value:
+        - 102.1
+        - 0.03
+        values.USA.value:
+        - 124.4
+        - 0.03
+      equals:
+        values.CAN.period: '2025'
+        values.FRA.period: '2025'
+        values.DEU.period: '2025'
+        values.ITA.period: '2025'
+        values.JPN.period: '2025'
+        values.GBR.period: '2025'
+        values.USA.period: '2025'
+  answer: Japan, with its ratio and year (IMF). The World Bank series is stale for Germany and Italy (last years
+    1990 and 1992), so an answer built on it must not rank them by those years.
+- id: indirect-nigeria-population-2023
+  kind: indirect
+  lang: en
+  category: demographics
+  source: article
+  prompt: Population of Nigeria in 2023
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: total-population
+      country: NGA
+      year: 2023
+    expect:
+      approx:
+        values.2023:
+        - 227882945.0
+        - 0.03
+  answer: About 228 million people in 2023, source World Bank.
+- id: indirect-singapore-current-account
+  kind: indirect
+  lang: en
+  category: macroeconomics
+  source: 'gsc: singapore current account balance'
+  prompt: How has Singapore's current account balance changed over the last five years?
+  call: true
+  also_ok:
+  - current-account-balance-2
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: current-account-balance
+      country: SGP
+      start_year: 2021
+    expect:
+      approx:
+        values.2021:
+        - 84926100063.2683
+        - 0.03
+        values.2023:
+        - 83791102946.6524
+        - 0.03
+        values.2025:
+        - 100926153963.823
+        - 0.03
+  answer: Current account balance of Singapore 2021-2025 with unit and source.
+- id: indirect-us-gdp-per-capita-1960
+  kind: indirect
+  lang: en
+  category: macroeconomics
+  source: 'gsc: u.s. gdp per capita 1960 $3,007'
+  prompt: What was US GDP per capita in 1960?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: gdp-per-capita
+      country: USA
+      year: 1960
+    expect:
+      approx:
+        values.1960:
+        - 2999.86487154495
+        - 0.03
+  answer: About 3,000 current USD in 1960. A single year works without signing in.
+- id: indirect-euribor-6m-dec-2022
+  kind: indirect
+  lang: en
+  category: financial markets
+  source: 'gsc: 6month euribor'
+  prompt: What was the 6-month Euribor at the end of 2022?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: euribor-6-month
+      country: EUR
+      year: 2022
+    expect:
+      approx:
+        values.2022-12:
+        - 2.5603333
+        - 0.05
+  answer: The December 2022 monthly average of 6-month EURIBOR in %, source ECB.
+  known_gap: The series is stored under the code EUR, which is not an ISO3 country and is not discoverable from
+    get_indicator_details; a model is likely to try EUU or EMU first.
+- id: indirect-nasdaq-end-2023
+  kind: indirect
+  lang: en
+  category: financial markets
+  source: manual
+  prompt: Where did the Nasdaq Composite close at the end of 2023?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: nasdaq-index
+      country: USA
+      year: 2023
+    expect:
+      approx:
+        values.2023-12-29:
+        - 15011.35
+        - 0.03
+  answer: The last close of 2023 in index points, source Nasdaq via FRED.
+  known_gap: The chart page reads /api/v1/timeseries, which returns the oldest 10,000 points by default, so the
+    Nasdaq chart ends in September 2010; the MCP server is correct.
+- id: indirect-crypto-fear-greed
+  kind: indirect
+  lang: en
+  category: financial markets
+  source: 'gsc: alternative.me crypto fear and greed index today'
+  prompt: What is the crypto fear and greed index today?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: fear-and-greed-index
+      country: GLB
+    expect:
+      equals:
+        truncated: true
+      at_least:
+        values: 125
+      last_key_at_least:
+        values: '2026-10-21'
+  answer: 'The latest daily value (0-100) with its date and label from Alternative.me. No fixed number: the value
+    changes daily.'
+- id: indirect-us-payrolls-2024
+  kind: indirect
+  lang: en
+  category: labor
+  source: 'gsc: non farm payrolls'
+  prompt: How many nonfarm payroll jobs did the US have at the end of 2024?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: nonfarm-payrolls-us
+      country: USA
+      year: 2024
+    expect:
+      approx:
+        values.2024-12:
+        - 158316.0
+        - 0.03
+  answer: The December 2024 level in thousands of persons, source BLS via FRED.
+- id: indirect-turkey-minimum-wage
+  kind: indirect
+  lang: en
+  category: labor
+  source: 'gsc: turkey minimum wage usd'
+  prompt: What is the minimum wage in Turkey?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: minimum-wage
+      country: TUR
+    expect:
+      approx:
+        values.2025:
+        - 17586.7504197526
+        - 0.03
+      last_key_at_least:
+        values: '2025'
+  answer: Latest annual minimum wage in USD PPP (OECD) with the year; states that it is annual and in PPP dollars.
+- id: indirect-south-africa-youth-unemployment
+  kind: indirect
+  lang: en
+  category: labor
+  source: manual
+  prompt: Youth unemployment rate in South Africa
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: youth-unemployment-15-24
+      country: ZAF
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2025:
+        - 59.93
+        - 0.05
+      last_key_at_least:
+        values: '2025'
+  answer: Latest youth (15-24) unemployment rate for South Africa with the year.
+- id: indirect-mexico-crude-death-rate
+  kind: indirect
+  lang: en
+  category: demographics
+  source: 'gsc: mexico crude death rate'
+  prompt: Crude death rate in Mexico
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: crude-death-rate
+      country: MEX
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2024:
+        - 6.219
+        - 0.03
+      last_key_at_least:
+        values: '2024'
+  answer: Deaths per 1,000 people for the latest year.
+- id: indirect-argentina-median-age
+  kind: indirect
+  lang: en
+  category: demographics
+  source: 'gsc: argentina median age'
+  prompt: What is the median age in Argentina?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: median-age
+      country: ARG
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2023:
+        - 32.1217
+        - 0.03
+      last_key_at_least:
+        values: '2023'
+  answer: Latest observed median age with its year; a later UN value is called a projection.
+- id: indirect-singapore-population-density
+  kind: indirect
+  lang: en
+  category: demographics
+  source: 'gsc: singapore population density'
+  prompt: Population density of Singapore
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: population-density
+      country: SGP
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2024:
+        - 8329.00110375276
+        - 0.03
+      last_key_at_least:
+        values: '2024'
+  answer: People per square km for the latest year.
+- id: indirect-us-15y-mortgage-since-2000
+  kind: indirect
+  lang: en
+  category: real estate
+  source: 'gsc: 15 year fixed mortgage rates history graph'
+  prompt: Show the history of the 15-year fixed mortgage rate since 2000.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: mortgage-rates-15y-fixed
+      country: USA
+      start_year: 2000
+    expect:
+      equals:
+        truncated: true
+      at_least:
+        values: 26
+      last_key_at_least:
+        values: '2026-10-15'
+  answer: 'Without sign-in only the latest 52 weekly values come back (truncated): the answer gives that range,
+    says the full history is on the chart page and does not invent older values.'
+  signed_in: get_full_series returns the weekly series from 2000; the answer can describe the full history.
+- id: indirect-us-house-prices-2008
+  kind: indirect
+  lang: en
+  category: real estate
+  source: manual
+  prompt: How much did US house prices fall in 2008?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: house-price-index-hpi
+      country: USA
+      start_year: 2007
+      end_year: 2009
+    expect:
+      approx:
+        values.2007-01:
+        - 184.515
+        - 0.03
+        values.2008-07:
+        - 163.563
+        - 0.03
+        values.2009-12:
+        - 147.931
+        - 0.03
+  answer: Case-Shiller index values for 2007-2009 and the fall over 2008 computed from them.
+- id: indirect-aluminum-2022
+  kind: indirect
+  lang: en
+  category: commodities and energy
+  source: 'gsc: aluminum market'
+  prompt: What was the aluminum price at the end of 2022?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: aluminum
+      country: USA
+      year: 2022
+    expect:
+      approx:
+        values.2022-12:
+        - 2398.206818181818
+        - 0.03
+  answer: The December 2022 price in USD per tonne, source IMF via FRED.
+  known_gap: The world aluminum price is stored under USA, not GLB, and get_indicator_details does not list the
+    code.
+- id: indirect-dairy-index-2023
+  kind: indirect
+  lang: en
+  category: commodities and energy
+  source: 'gsc: dairy price index'
+  prompt: FAO dairy price index at the end of 2023
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: fao-dairy-price-index
+      country: GLB
+      year: 2023
+    expect:
+      approx:
+        values.2023-12:
+        - 118.7
+        - 0.03
+  answer: The December 2023 index value, source FAO.
+  known_gap: The six FAO price indices have no source linked in the catalogue, so the tool returns source null (the
+    publisher and attribution are present).
+- id: indirect-nigeria-electricity-access
+  kind: indirect
+  lang: en
+  category: commodities and energy
+  source: manual
+  prompt: What share of people in Nigeria have access to electricity?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: access-to-electricity-percent
+      country: NGA
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2024:
+        - 62.5
+        - 0.03
+      last_key_at_least:
+        values: '2024'
+  answer: Latest % of population with access to electricity.
+- id: indirect-singapore-container-traffic-2023
+  kind: indirect
+  lang: en
+  category: transport and logistics
+  source: 'gsc: teu'
+  prompt: Container port traffic in Singapore in 2023
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: wdi-is-shp-good-tu
+      country: SGP
+      year: 2023
+    expect:
+      approx:
+        values.2023:
+        - 39010000.0
+        - 0.03
+  answer: TEU handled in Singapore in 2023, source World Bank.
+- id: indirect-turkey-air-passengers-2019
+  kind: indirect
+  lang: en
+  category: transport and logistics
+  source: manual
+  prompt: How many air passengers did Turkish carriers fly in 2019?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: wdi-is-air-psgr
+      country: TUR
+      year: 2019
+    expect:
+      approx:
+        values.2019:
+        - 111131475.0
+        - 0.03
+  answer: Passengers carried by Turkish-registered carriers in 2019.
+- id: indirect-india-life-expectancy
+  kind: indirect
+  lang: en
+  category: healthcare
+  source: 'gsc: life expectancy at birth in india'
+  prompt: Life expectancy at birth in India
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: life-expectancy-at-birth
+      country: IND
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2024:
+        - 72.235
+        - 0.03
+      last_key_at_least:
+        values: '2024'
+  answer: Latest life expectancy at birth in years with the year.
+- id: indirect-us-health-spending
+  kind: indirect
+  lang: en
+  category: healthcare
+  source: manual
+  prompt: How much of its GDP does the United States spend on health care?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: healthcare-expenditure-percent-gdp
+      country: USA
+    expect:
+      approx:
+        values.2023:
+        - 16.69414902
+        - 0.05
+      last_key_at_least:
+        values: '2023'
+  answer: Latest health expenditure as % of GDP with the year.
+- id: indirect-korea-tertiary-enrollment
+  kind: indirect
+  lang: en
+  category: education
+  source: manual
+  prompt: Tertiary school enrollment in South Korea
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: school-enrollment-tertiary
+      country: KOR
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2024:
+        - 111.853302001953
+        - 0.05
+      last_key_at_least:
+        values: '2024'
+  answer: Latest gross tertiary enrollment ratio in % with the year.
+- id: indirect-us-mobile-subscriptions
+  kind: indirect
+  lang: en
+  category: technology and internet
+  source: 'gsc: cellular subscriptions in us'
+  prompt: Mobile cellular subscriptions per 100 people in the US
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: mobile-cellular-subscriptions-per-100-people
+      country: USA
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2024:
+        - 113.190481805755
+        - 0.03
+      last_key_at_least:
+        values: '2024'
+  answer: Latest subscriptions per 100 people with the year.
+- id: indirect-india-internet-users
+  kind: indirect
+  lang: en
+  category: technology and internet
+  source: manual
+  prompt: What share of people in India use the internet?
+  call: true
+  also_ok:
+  - internet-penetration-rate
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: individuals-using-the-internet-of-population
+      country: IND
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2025:
+        - 70.0
+        - 0.05
+      last_key_at_least:
+        values: '2025'
+  answer: Latest % of population using the internet with the year.
+- id: indirect-crude-oil-trend
+  kind: indirect
+  lang: en
+  category: commodities and energy
+  source: 'gsc: crude oil price trend'
+  prompt: How has the crude oil price moved over the last year?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: brent-oil
+      country: GLB
+    expect:
+      equals:
+        truncated: true
+      at_least:
+        values: 125
+      last_key_at_least:
+        values: '2026-10-20'
+  answer: Brent daily prices for the latest year with the range and the latest value.
+  known_gap: search_indicators returns no match for 'crude oil'; the model has to retry with 'oil' or 'brent'.
+- id: indirect-aluminium-british
+  kind: indirect
+  lang: en
+  category: commodities and energy
+  source: 'gsc: aluminium price development'
+  prompt: What is the aluminium price now?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: aluminum
+      country: USA
+    expect:
+      equals:
+        truncated: true
+      at_least:
+        values: 60
+      last_key_at_least:
+        values: 2026-07
+  answer: Latest monthly aluminum price in USD per tonne with its month.
+  known_gap: search_indicators returns no match for the British spelling 'aluminium'; the series is also stored
+    under USA, not GLB.
+- id: negative-what-is-inflation
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: What is inflation?
+  call: false
+  answer: 'No EconDash call: a definition, no data needed.'
+- id: negative-poem-money
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: Write a short poem about money.
+  call: false
+  answer: 'No EconDash call: creative writing.'
+- id: negative-apple-stock
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: What is Apple's stock price today?
+  call: false
+  answer: 'No EconDash call: single stocks are not in EconDash.'
+- id: negative-weather-paris
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: What's the weather in Paris tomorrow?
+  call: false
+  answer: 'No EconDash call: weather.'
+- id: negative-translate
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: Translate "economic growth" into Spanish.
+  call: false
+  answer: 'No EconDash call: translation.'
+- id: negative-gdp-vs-gnp
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: Explain the difference between GDP and GNP.
+  call: false
+  answer: 'No EconDash call: concept explanation.'
+- id: negative-ppi-release-time-nigeria
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: What time is the PPI news release today in Nigeria?
+  call: false
+  answer: 'No EconDash call: release calendar, not data (gsc: ppi news today time in nigeria).'
+- id: negative-ksa-capital-gains-tax
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: What is the capital gains tax rate in Saudi Arabia?
+  call: false
+  answer: 'No EconDash call: tax law (gsc: capital gains tax in ksa).'
+- id: negative-cagr-code
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: Write Python code that computes a compound annual growth rate.
+  call: false
+  answer: 'No EconDash call: coding.'
+- id: negative-boe-governor
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: Who is the current governor of the Bank of England?
+  call: false
+  answer: 'No EconDash call: a person, not a statistic.'
+- id: negative-keynes-summary
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: Summarize the main ideas of Keynes's General Theory.
+  call: false
+  answer: 'No EconDash call: book summary.'
+- id: negative-bitcoin-price
+  kind: negative
+  lang: en
+  category: none
+  source: manual
+  prompt: What is the bitcoin price right now?
+  call: false
+  answer: 'No EconDash call: crypto prices are not in EconDash.'
+- id: edge-fictional-country
+  kind: edge
+  lang: en
+  category: macroeconomics
+  source: manual
+  prompt: What is the GDP of Wakanda?
+  call: optional
+  answer: Wakanda is fictional. No figure is given. A list_countries or search call is acceptable, a data call with
+    an invented code is not.
+- id: edge-france-population-1900
+  kind: edge
+  lang: en
+  category: demographics
+  source: manual
+  prompt: What was the population of France in 1900?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: total-population
+      country: FRA
+      year: 1900
+    expect:
+      error: No data for
+  answer: EconDash starts in 1960 for this series, so the answer says so and gives no EconDash figure for 1900.
+- id: edge-missing-indicator
+  kind: edge
+  lang: en
+  category: catalogue
+  source: manual
+  prompt: How many McDonald's restaurants are there in Japan?
+  call: true
+  checks:
+  - tool: search_indicators
+    args:
+      query: mcdonald
+    expect:
+      error: No indicators match
+  answer: EconDash has no such indicator; the answer says so instead of presenting another series.
+- id: edge-future-year
+  kind: edge
+  lang: en
+  category: macroeconomics
+  source: manual
+  prompt: What will Germany's GDP growth be in 2035?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: real-gdp-growth
+      country: DEU
+      year: 2035
+    expect:
+      error: No data for
+  answer: IMF projections in EconDash end in 2031; no 2035 figure.
+- id: edge-russia-mortgage-rates
+  kind: edge
+  lang: en
+  category: real estate
+  source: 'gsc: mortgage rates russia'
+  prompt: What are mortgage rates in Russia?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: mortgage-rates-30y-fixed
+      country: RUS
+    expect:
+      error: No data for
+  answer: EconDash has mortgage rates only for the US. The answer must not present US rates as Russian ones.
+- id: edge-argentina-inflation-1980s
+  kind: edge
+  lang: en
+  category: macroeconomics
+  source: 'gsc: argentina inflation rate historical'
+  prompt: How did inflation in Argentina change in the 1980s?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: cpi-inflation
+      country: ARG
+      start_year: 1980
+      end_year: 1989
+    expect:
+      error: No data for
+  - tool: get_indicator_series
+    args:
+      indicator: cpi-inflation-rate-percent
+      country: ARG
+      start_year: 1980
+      end_year: 1989
+    expect:
+      error: No data for
+  answer: EconDash has no Argentine CPI before 1998 (IMF) or 2018 (World Bank). The answer says so; any 1980s figures
+    must be labelled as not from EconDash.
+- id: edge-austria-literacy
+  kind: edge
+  lang: en
+  category: education
+  source: 'gsc: austria literacy rate'
+  prompt: What is the literacy rate in Austria?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: literacy-rate-adult
+      country: AUT
+    expect:
+      error: No data for
+  answer: No data for Austria in EconDash (UNESCO does not report it for most high-income countries). The answer
+    says so.
+- id: edge-us-gdp-per-capita-full-history
+  kind: edge
+  lang: en
+  category: macroeconomics
+  source: manual
+  prompt: Give me US GDP per capita for every year since 1960.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: gdp-per-capita
+      country: USA
+      start_year: 1960
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2025:
+        - 90026.5163005744
+        - 0.03
+  answer: 'Without sign-in the latest 30 years come back with truncated true: the answer lists them, says older
+    years are on the chart page and invents none.'
+  signed_in: get_full_series returns all 66 years from 1960.
+- id: ru-argentina-inflation-latest
+  kind: indirect
+  lang: ru
+  category: macroeconomics
+  source: manual
+  prompt: Какая сейчас инфляция в Аргентине?
+  call: true
+  also_ok:
+  - cpi-inflation-rate-percent
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: cpi-inflation
+      country: ARG
+    expect:
+      approx:
+        values.2025:
+        - 41.9
+        - 0.03
+      last_key_at_least:
+        values: '2025'
+  answer: Last observed annual CPI inflation for Argentina with the year, in Russian.
+- id: ru-singapore-gdp-per-capita
+  kind: indirect
+  lang: ru
+  category: macroeconomics
+  source: manual
+  prompt: ВВП на душу населения в Сингапуре
+  call: true
+  also_ok:
+  - gdp-per-capita-imf
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: gdp-per-capita
+      country: SGP
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2025:
+        - 98813.9788172877
+        - 0.03
+      last_key_at_least:
+        values: '2025'
+  answer: Latest GDP per capita of Singapore in USD, in Russian.
+- id: ru-spain-italy-unemployment-2015
+  kind: indirect
+  lang: ru
+  category: labor
+  source: manual
+  prompt: Сравни безработицу в Испании и Италии в 2015 году
+  call: true
+  also_ok:
+  - unemployment-rate
+  - unemployment-ilo-estimates
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: unemployment-rate-u3
+      countries:
+      - ESP
+      - ITA
+      year: 2015
+    expect:
+      approx:
+        values.ESP.value:
+        - 22.057
+        - 0.05
+        values.ITA.value:
+        - 11.896
+        - 0.05
+      equals:
+        values.ESP.period: '2015'
+        values.ITA.period: '2015'
+  answer: Both rates for 2015, Spain about twice Italy's level.
+- id: ru-india-life-expectancy
+  kind: indirect
+  lang: ru
+  category: healthcare
+  source: manual
+  prompt: Ожидаемая продолжительность жизни в Индии
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: life-expectancy-at-birth
+      country: IND
+    expect:
+      equals:
+        truncated: true
+      approx:
+        values.2024:
+        - 72.235
+        - 0.03
+      last_key_at_least:
+        values: '2024'
+  answer: Latest value in years with the year.
+- id: ru-nigeria-population-2023
+  kind: indirect
+  lang: ru
+  category: demographics
+  source: manual
+  prompt: Население Нигерии в 2023 году
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: total-population
+      country: NGA
+      year: 2023
+    expect:
+      approx:
+        values.2023:
+        - 227882945.0
+        - 0.03
+  answer: About 228 million in 2023.
+- id: ru-nigeria-literacy
+  kind: direct
+  lang: ru
+  category: education
+  source: manual
+  prompt: Уровень грамотности взрослых в Нигерии по данным EconDash
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: literacy-rate-adult
+      country: NGA
+    expect:
+      approx:
+        values.2024:
+        - 70.4100036621094
+        - 0.05
+      last_key_at_least:
+        values: '2024'
+  answer: Latest adult literacy rate with the year.
+- id: ru-russia-mortgage
+  kind: edge
+  lang: ru
+  category: real estate
+  source: manual
+  prompt: Какие ставки по ипотеке в России?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: mortgage-rates-30y-fixed
+      country: RUS
+    expect:
+      error: No data for
+  answer: EconDash has only US mortgage rates; the answer says so in Russian.
+- id: ru-negative-what-is-inflation
+  kind: negative
+  lang: ru
+  category: none
+  source: manual
+  prompt: Что такое инфляция?
+  call: false
+  answer: 'No EconDash call: a definition.'
+- id: ru-negative-poem
+  kind: negative
+  lang: ru
+  category: none
+  source: manual
+  prompt: Напиши стихотворение о деньгах
+  call: false
+  answer: 'No EconDash call: creative writing.'
+- id: ru-negative-bitcoin
+  kind: negative
+  lang: ru
+  category: none
+  source: manual
+  prompt: Какой курс биткоина сегодня?
+  call: false
+  answer: 'No EconDash call: crypto prices are not in EconDash.'

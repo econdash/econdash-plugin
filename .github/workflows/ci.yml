@@ -109,6 +109,47 @@ jobs:
           print(f"README words outside code: {words}")
           sys.exit(0 if words >= 40 else 1)
 
+      - name: Golden prompt set is well formed
+        run: |
+          pip install --quiet --disable-pip-version-check PyYAML==6.0.3
+          python3 - <<'EOF'
+          import collections, sys, yaml
+          prompts = yaml.safe_load(open("evals/golden-prompts.yaml"))["prompts"]
+          tools = {"search_indicators", "get_indicator_series", "get_full_series", "compare_countries",
+                   "get_indicator_details", "list_countries"}
+          categories = {"macroeconomics", "financial markets", "labor", "demographics", "real estate",
+                        "commodities and energy", "transport and logistics", "healthcare", "education",
+                        "technology and internet"}
+          errors = []
+          ids = [p["id"] for p in prompts]
+          errors += [f"duplicate id {i}" for i, n in collections.Counter(ids).items() if n > 1]
+          for p in prompts:
+              checks = p.get("checks", [])
+              if p["kind"] not in ("direct", "indirect", "negative", "edge") or p["lang"] not in ("en", "ru"):
+                  errors.append(f"{p['id']}: unknown kind or lang")
+              if p["kind"] == "negative" and (p["call"] is not False or checks):
+                  errors.append(f"{p['id']}: a negative prompt expects no call and has no checks")
+              if p["call"] is True and not checks:
+                  errors.append(f"{p['id']}: call true needs checks")
+              if not p.get("answer"):
+                  errors.append(f"{p['id']}: no expected answer")
+              errors += [f"{p['id']}: unknown tool {c['tool']}" for c in checks if c["tool"] not in tools]
+              errors += [f"{p['id']}: check without expect" for c in checks if not c.get("expect")]
+          en = collections.Counter(p["kind"] for p in prompts if p["lang"] == "en")
+          for kind, low, high in (("direct", 10, 15), ("indirect", 20, 30), ("negative", 10, 15), ("edge", 5, 10)):
+              if not low <= en[kind] <= high:
+                  errors.append(f"{en[kind]} English {kind} prompts, expected {low}-{high}")
+          if not 40 <= sum(en.values()) <= 60:
+              errors.append(f"{sum(en.values())} English prompts, expected 40-60")
+          if sum(p["lang"] == "ru" for p in prompts) < 10:
+              errors.append("fewer than 10 Russian prompts")
+          missing = categories - {p["category"] for p in prompts if p["kind"] in ("direct", "indirect")}
+          if missing:
+              errors.append(f"no direct or indirect prompt for: {', '.join(sorted(missing))}")
+          print("\n".join(f"::error file=evals/golden-prompts.yaml::{e}" for e in errors) or f"{len(prompts)} prompts OK")
+          sys.exit(1 if errors else 0)
+          EOF
+
       - name: Skills stay neutral
         run: |
           [ -d skills ] || { echo "no skills yet"; exit 0; }
