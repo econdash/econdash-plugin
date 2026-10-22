@@ -695,6 +695,8 @@ prompts:
   source: manual
   prompt: How much did US house prices fall in 2008?
   call: true
+  also_ok:
+  - nominal-residential-property-prices
   checks:
   - tool: get_indicator_series
     args:
