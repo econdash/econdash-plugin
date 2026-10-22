@@ -14,6 +14,8 @@
 #              tool and args are what a good model sends; expect is checked against the live
 #              server, values recorded on 2026-10-22 with a relative tolerance for revisions.
 #   also_ok    other indicator slugs that answer the question as well
+#   any_country  the series is a world price or rate stored under one code (GLB, USA, EUR);
+#              any code that returns the data counts
 #   answer     what a correct answer says
 #   signed_in  how the answer differs for a user signed in to EconDash (full history);
 #              everything else is the same for anonymous and signed-in users
@@ -219,6 +221,7 @@ prompts:
   source: manual
   prompt: With EconDash, what was the Brent oil price at the end of 2020?
   call: true
+  any_country: true
   checks:
   - tool: get_indicator_series
     args:
@@ -469,6 +472,7 @@ prompts:
   source: 'gsc: 6month euribor'
   prompt: What was the 6-month Euribor at the end of 2022?
   call: true
+  any_country: true
   checks:
   - tool: get_indicator_series
     args:
@@ -511,6 +515,7 @@ prompts:
   source: 'gsc: alternative.me crypto fear and greed index today'
   prompt: What is the crypto fear and greed index today?
   call: true
+  any_country: true
   checks:
   - tool: get_indicator_series
     args:
@@ -708,6 +713,7 @@ prompts:
   source: 'gsc: aluminum market'
   prompt: What was the aluminum price at the end of 2022?
   call: true
+  any_country: true
   checks:
   - tool: get_indicator_series
     args:
@@ -729,6 +735,7 @@ prompts:
   source: 'gsc: dairy price index'
   prompt: FAO dairy price index at the end of 2023
   call: true
+  any_country: true
   checks:
   - tool: get_indicator_series
     args:
@@ -920,6 +927,9 @@ prompts:
   source: 'gsc: crude oil price trend'
   prompt: How has the crude oil price moved over the last year?
   call: true
+  any_country: true
+  also_ok:
+  - wti-oil
   checks:
   - tool: get_indicator_series
     args:
@@ -941,6 +951,7 @@ prompts:
   source: 'gsc: aluminium price development'
   prompt: What is the aluminium price now?
   call: true
+  any_country: true
   checks:
   - tool: get_indicator_series
     args:
