@@ -506,8 +506,6 @@ prompts:
         - 15011.35
         - 0.03
   answer: The last close of 2023 in index points, source Nasdaq via FRED.
-  known_gap: The chart page reads /api/v1/timeseries, which returns the oldest 10,000 points by default, so the
-    Nasdaq chart ends in September 2010; the MCP server is correct.
 - id: indirect-crypto-fear-greed
   kind: indirect
   lang: en
