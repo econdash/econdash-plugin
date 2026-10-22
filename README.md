@@ -74,7 +74,15 @@ When the assistant calls a tool, the EconDash server receives the tool name and 
 
 ## Signing in
 
-Search, recent values, comparisons and indicator details work without an account. Only `get_full_series` asks you to sign in to EconDash. Your assistant opens a page on econdash.org, you sign in and click **Allow**, and the assistant receives a read-only token. It never sees your password and cannot change your account or make payments.
+Search, recent values, comparisons and indicator details work without an account. Only `get_full_series` asks you to sign in to EconDash; without it, the tool answers with a message and the assistant can use `get_indicator_series` instead.
+
+- **Claude Code:** run `/mcp`, pick `plugin:econdash:econdash` and choose **Authenticate** (Claude Code may label it **Re-authenticate**).
+- **Gemini CLI:** run `/mcp auth econdash`.
+- **Claude (claude.ai, Desktop, mobile):** Claude offers to connect your account the first time the assistant calls `get_full_series`.
+
+A page on econdash.org opens, you sign in and click **Allow**, and the assistant receives a read-only token. It never sees your password and cannot change your account or make payments.
+
+If Claude Code lists EconDash as "needs authentication" and shows no EconDash tools (the server caused this after an anonymous `get_full_series` call until October 2026), sign in as above or run `claude mcp logout plugin:econdash:econdash`. The free tools come back in the next session.
 
 ## Limits
 
