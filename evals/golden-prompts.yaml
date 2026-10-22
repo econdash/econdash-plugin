@@ -119,6 +119,12 @@ prompts:
   - gross-government-debt
   - central-government-debt-percent-of-gdp
   checks:
+  - tool: search_indicators
+    args:
+      query: debt to gdp
+    expect:
+      contains:
+        results: '"government-debt-percent-gdp"'
   - tool: get_indicator_series
     args:
       indicator: government-debt-percent-gdp
@@ -133,7 +139,6 @@ prompts:
       last_key_at_least:
         values: '2024'
   answer: UK government debt as % of GDP for the latest year, with source.
-  known_gap: search_indicators returns no match for 'debt to gdp'; the model has to retry with 'government debt'.
 - id: direct-search-house-prices
   kind: direct
   lang: en
@@ -485,8 +490,6 @@ prompts:
         - 2.5603333
         - 0.05
   answer: The December 2022 monthly average of 6-month EURIBOR in %, source ECB.
-  known_gap: The series is stored under the code EUR, which is not an ISO3 country and is not discoverable from
-    get_indicator_details; a model is likely to try EUU or EMU first.
 - id: indirect-nasdaq-end-2023
   kind: indirect
   lang: en
@@ -724,8 +727,6 @@ prompts:
         - 2398.206818181818
         - 0.03
   answer: The December 2022 price in USD per tonne, source IMF via FRED.
-  known_gap: The world aluminum price is stored under USA, not GLB, and get_indicator_details does not list the
-    code.
 - id: indirect-dairy-index-2023
   kind: indirect
   lang: en
@@ -927,6 +928,12 @@ prompts:
   also_ok:
   - wti-oil
   checks:
+  - tool: search_indicators
+    args:
+      query: crude oil
+    expect:
+      contains:
+        results: '"brent-oil"'
   - tool: get_indicator_series
     args:
       indicator: brent-oil
@@ -939,7 +946,6 @@ prompts:
       last_key_at_least:
         values: '2026-10-20'
   answer: Brent daily prices for the latest year with the range and the latest value.
-  known_gap: search_indicators returns no match for 'crude oil'; the model has to retry with 'oil' or 'brent'.
 - id: indirect-aluminium-british
   kind: indirect
   lang: en
@@ -949,6 +955,12 @@ prompts:
   call: true
   any_country: true
   checks:
+  - tool: search_indicators
+    args:
+      query: aluminium
+    expect:
+      contains:
+        results: '"aluminum"'
   - tool: get_indicator_series
     args:
       indicator: aluminum
@@ -961,8 +973,6 @@ prompts:
       last_key_at_least:
         values: 2026-07
   answer: Latest monthly aluminum price in USD per tonne with its month.
-  known_gap: search_indicators returns no match for the British spelling 'aluminium'; the series is also stored
-    under USA, not GLB.
 - id: negative-what-is-inflation
   kind: negative
   lang: en
