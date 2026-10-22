@@ -1,5 +1,7 @@
 # EconDash plugin
 
+[![EconDash MCP connector – tool definition quality and endpoint health on Glama](https://glama.ai/mcp/connectors/org.econdash/econdash/badges/score.svg)](https://glama.ai/mcp/connectors/org.econdash/econdash)
+
 Public statistics for 290+ countries and regions, inside your AI assistant. EconDash has 750+ indicators in ten categories:
 
 - macroeconomics: GDP, inflation, debt, trade;
@@ -15,7 +17,7 @@ Public statistics for 290+ countries and regions, inside your AI assistant. Econ
 
 The data comes from the World Bank, IMF, FRED, Eurostat, ECB, OECD, WHO and other public sources. Every figure arrives with its source, licence and a link to the chart on [econdash.org](https://econdash.org).
 
-The plugin connects your assistant to the EconDash MCP server at `https://mcp.econdash.org/mcp`. It is read-only and free: the server never changes data and never takes payments.
+The plugin connects your assistant to the EconDash MCP server at `https://mcp.econdash.org/mcp`. It is read-only and free: the server never changes data and never takes payments. The server is listed in the [official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=org.econdash) as `org.econdash/econdash`.
 
 ## What it can do
 
