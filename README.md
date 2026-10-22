@@ -78,6 +78,7 @@ Search, recent values, comparisons and indicator details work without an account
 
 - **Claude Code:** run `/mcp`, pick `plugin:econdash:econdash` and choose **Authenticate** (Claude Code may label it **Re-authenticate**).
 - **Gemini CLI:** run `/mcp auth econdash`.
+- **Grok Build:** run `/mcps`, select `econdash` and press `i`.
 - **Claude (claude.ai, Desktop, mobile):** Claude offers to connect your account the first time the assistant calls `get_full_series`.
 
 A page on econdash.org opens, you sign in and click **Allow**, and the assistant receives a read-only token. It never sees your password and cannot change your account or make payments.
