@@ -746,8 +746,6 @@ prompts:
         - 118.7
         - 0.03
   answer: The December 2023 index value, source FAO.
-  known_gap: The six FAO price indices have no source linked in the catalogue, so the tool returns source null (the
-    publisher and attribution are present).
 - id: indirect-nigeria-electricity-access
   kind: indirect
   lang: en
