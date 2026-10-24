@@ -184,6 +184,39 @@ jobs:
           print("\n".join(f"::error::{e}" for e in errors) or "skills OK")
           sys.exit(1 if errors else 0)
 
+      - name: Skill prompt set covers every category
+        run: |
+          pip install --quiet --disable-pip-version-check PyYAML==6.0.3
+          python3 - <<'EOF'
+          import collections, pathlib, sys, yaml
+          prompts = yaml.safe_load(open("evals/skill-prompts.yaml"))["prompts"]
+          skills = {p.name for p in pathlib.Path("skills").iterdir() if (p / "SKILL.md").exists()}
+          tools = {"search_indicators", "get_indicator_series", "get_full_series", "compare_countries",
+                   "get_indicator_details", "list_countries"}
+          categories = {"macroeconomics", "financial markets", "labor", "demographics", "real estate",
+                        "commodities and energy", "transport and logistics", "healthcare", "education",
+                        "technology and internet"}
+          errors = []
+          for p in prompts:
+              if p["skill"] is None:
+                  if p["call"] is not False or p.get("checks"):
+                      errors.append(f"near miss expects a call: {p['prompt']}")
+                  continue
+              if p["skill"] not in skills:
+                  errors.append(f"unknown skill {p['skill']}: {p['prompt']}")
+              if p["call"] is not True or not p.get("checks"):
+                  errors.append(f"skill prompt needs call: true and checks: {p['prompt']}")
+              errors += [f"unknown tool {c['tool']}: {p['prompt']}" for c in p.get("checks", []) if c["tool"] not in tools]
+          count = collections.Counter((p["skill"], p["category"]) for p in prompts if p["skill"])
+          for skill in ("compare-economies", "cite-economic-data"):
+              errors += [f"{skill}: fewer than 2 prompts for {c}" for c in sorted(categories) if count[(skill, c)] < 2]
+          errors += [f"{s}: no prompts" for s in skills if not any(k[0] == s for k in count)]
+          if sum(p["skill"] is None for p in prompts) < 10:
+              errors.append("fewer than 10 near misses")
+          print("\n".join(f"::error file=evals/skill-prompts.yaml::{e}" for e in errors) or f"{len(prompts)} skill prompts OK")
+          sys.exit(1 if errors else 0)
+          EOF
+
       - name: Indicator slugs in skills exist
         shell: python3 {0}
         run: |

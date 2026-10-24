@@ -1,25 +1,1297 @@
-# Questions that each skill in skills/ is written for.
+# Questions the skills in skills/ are written for, in all ten EconDash categories.
 #
-# A run passes when the model loads the named skill for each of its prompts and loads no
-# skill for the negative prompts in golden-prompts.yaml. The data in the answer is graded
-# with golden-prompts.yaml, not here.
+# Each category has five compare-economies and five cite-economic-data prompts; macro-research
+# has four country overviews. Prompts with skill: null are near misses: questions on the same
+# topics that need no EconDash data, where no skill should load and no tool should be called.
+#
+# Fields as in golden-prompts.yaml: call, checks (the data call a correct answer rests on),
+# also_ok (other slugs that answer it), any_country (a series stored under one code).
+# The expected series were checked against the live server on 2026-10-24.
+#
+# A run passes when the model loads the named skill on its prompts, loads none on the near
+# misses, and the data calls match the checks.
 
 prompts:
 - skill: macro-research
+  category: macroeconomics
   prompt: Give me a macro snapshot of Brazil.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: gdp-growth-annual-percent
+      country: BRA
+  also_ok:
+  - gdp-growth-annual-percent
+  - real-gdp-growth
+  - gdp-per-capita
+  - gdp-per-capita-imf
+  - cpi-inflation-rate-percent
+  - cpi-inflation
+  - unemployment-ilo-estimates
+  - unemployment-rate
+  - government-debt-percent-gdp
+  - gross-government-debt
+  - current-account-balance-2
+  - current-account-balance
+  - trade-volume-percent-gdp
 - skill: macro-research
-  prompt: "How is the Turkish economy doing? Growth, inflation, jobs and debt."
+  category: macroeconomics
+  prompt: How is the Turkish economy doing? Growth, inflation, jobs and debt.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: cpi-inflation-rate-percent
+      country: TUR
+  also_ok:
+  - gdp-growth-annual-percent
+  - real-gdp-growth
+  - gdp-per-capita
+  - gdp-per-capita-imf
+  - cpi-inflation-rate-percent
+  - cpi-inflation
+  - unemployment-ilo-estimates
+  - unemployment-rate
+  - government-debt-percent-gdp
+  - gross-government-debt
+  - current-account-balance-2
+  - current-account-balance
+  - trade-volume-percent-gdp
 - skill: macro-research
+  category: macroeconomics
   prompt: Quick overview of Poland's economy over the last decade.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: gdp-growth-annual-percent
+      country: POL
+  also_ok:
+  - gdp-growth-annual-percent
+  - real-gdp-growth
+  - gdp-per-capita
+  - gdp-per-capita-imf
+  - cpi-inflation-rate-percent
+  - cpi-inflation
+  - unemployment-ilo-estimates
+  - unemployment-rate
+  - government-debt-percent-gdp
+  - gross-government-debt
+  - current-account-balance-2
+  - current-account-balance
+  - trade-volume-percent-gdp
+- skill: macro-research
+  category: macroeconomics
+  prompt: Give me an economic overview of South Africa.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: gdp-growth-annual-percent
+      country: ZAF
+  also_ok:
+  - gdp-growth-annual-percent
+  - real-gdp-growth
+  - gdp-per-capita
+  - gdp-per-capita-imf
+  - cpi-inflation-rate-percent
+  - cpi-inflation
+  - unemployment-ilo-estimates
+  - unemployment-rate
+  - government-debt-percent-gdp
+  - gross-government-debt
+  - current-account-balance-2
+  - current-account-balance
+  - trade-volume-percent-gdp
 - skill: compare-economies
+  category: macroeconomics
+  prompt: Compare GDP growth in India, China and Indonesia in 2024.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: gdp-growth-annual-percent
+      countries:
+      - IND
+      - CHN
+      - IDN
+      year: 2024
+  also_ok:
+  - real-gdp-growth
+- skill: compare-economies
+  category: macroeconomics
   prompt: Rank the Nordic countries by GDP per capita.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: gdp-per-capita
+      countries:
+      - DNK
+      - FIN
+      - ISL
+      - NOR
+      - SWE
+  also_ok:
+  - gdp-per-capita-imf
 - skill: compare-economies
-  prompt: Compare life expectancy in Japan, Italy and Spain.
-- skill: compare-economies
+  category: macroeconomics
   prompt: Which BRICS country has the highest inflation?
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: cpi-inflation-rate-percent
+      countries:
+      - BRA
+      - RUS
+      - IND
+      - CHN
+      - ZAF
+  also_ok:
+  - cpi-inflation
+- skill: compare-economies
+  category: financial markets
+  prompt: Compare real interest rates in Brazil, Mexico and Chile.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: real-interest-rates
+      countries:
+      - BRA
+      - MEX
+      - CHL
+- skill: compare-economies
+  category: financial markets
+  prompt: 'Which country has the highest lending interest rate: Kenya, Nigeria or Malawi?'
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: consumer-rates
+      countries:
+      - KEN
+      - NGA
+      - MWI
+- skill: compare-economies
+  category: labor
+  prompt: Compare youth unemployment in Spain, Greece and Italy.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: youth-unemployment-15-24
+      countries:
+      - ESP
+      - GRC
+      - ITA
+- skill: compare-economies
+  category: labor
+  prompt: Rank the G7 countries by labor force participation.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: labor-force-participation-rate
+      countries:
+      - CAN
+      - FRA
+      - DEU
+      - ITA
+      - JPN
+      - GBR
+      - USA
+  also_ok:
+  - labor-force-participation-ilo-estimates
+- skill: compare-economies
+  category: demographics
+  prompt: Compare the fertility rate in South Korea, Japan and Italy.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: total-fertility-rate-tfr
+      countries:
+      - KOR
+      - JPN
+      - ITA
+- skill: compare-economies
+  category: demographics
+  prompt: 'Which country is youngest by median age: Nigeria, India or Indonesia?'
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: median-age
+      countries:
+      - NGA
+      - IND
+      - IDN
+- skill: compare-economies
+  category: real estate
+  prompt: Compare real house prices in Canada, Australia and New Zealand.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: real-residential-property-prices
+      countries:
+      - CAN
+      - AUS
+      - NZL
+  also_ok:
+  - nominal-residential-property-prices
+- skill: compare-economies
+  category: real estate
+  prompt: Have nominal house prices risen more in Germany or in Spain since 2015?
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: nominal-residential-property-prices
+      countries:
+      - DEU
+      - ESP
+  also_ok:
+  - real-residential-property-prices
+- skill: compare-economies
+  category: commodities and energy
+  prompt: Compare access to electricity in Nigeria, Kenya and Ethiopia.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: access-to-electricity-percent
+      countries:
+      - NGA
+      - KEN
+      - ETH
+- skill: compare-economies
+  category: commodities and energy
+  prompt: Rank Germany, France, Spain and Italy by the share of renewable energy in consumption.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: renewable-energy-consumption-percent
+      countries:
+      - DEU
+      - FRA
+      - ESP
+      - ITA
+- skill: compare-economies
+  category: transport and logistics
+  prompt: Compare container port traffic in Singapore, the Netherlands and the UAE.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: container-throughput-teu
+      countries:
+      - SGP
+      - NLD
+      - ARE
+- skill: compare-economies
+  category: transport and logistics
+  prompt: Which carried more air passengers in 2019, Turkey or the UAE?
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: wdi-is-air-psgr
+      countries:
+      - TUR
+      - ARE
+      year: 2019
+- skill: compare-economies
+  category: healthcare
+  prompt: Compare life expectancy in Japan, Italy and Spain.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: life-expectancy-at-birth
+      countries:
+      - JPN
+      - ITA
+      - ESP
+- skill: compare-economies
+  category: healthcare
+  prompt: Rank the US, Germany and the UK by health spending as a share of GDP.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: healthcare-expenditure-percent-gdp
+      countries:
+      - USA
+      - DEU
+      - GBR
+- skill: compare-economies
+  category: education
+  prompt: Compare tertiary school enrollment in South Korea, Japan and the United States.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: school-enrollment-tertiary
+      countries:
+      - KOR
+      - JPN
+      - USA
+- skill: compare-economies
+  category: education
+  prompt: 'Which has the highest adult literacy rate: Nigeria, Egypt or Pakistan?'
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: literacy-rate-adult
+      countries:
+      - NGA
+      - EGY
+      - PAK
+- skill: compare-economies
+  category: technology and internet
+  prompt: Compare internet use in India, Brazil and Indonesia.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: internet-penetration-rate
+      countries:
+      - IND
+      - BRA
+      - IDN
+  also_ok:
+  - individuals-using-the-internet-of-population
+- skill: compare-economies
+  category: technology and internet
+  prompt: Rank Germany, Japan and South Korea by fixed broadband subscriptions.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: broadband-subscriptions-fixed
+      countries:
+      - DEU
+      - JPN
+      - KOR
+- skill: compare-economies
+  category: macroeconomics
+  prompt: Compare inflation in Argentina, Turkey and Egypt in 2023.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: cpi-inflation-rate-percent
+      countries:
+      - ARG
+      - TUR
+      - EGY
+      year: 2023
+  also_ok:
+  - cpi-inflation
+- skill: compare-economies
+  category: macroeconomics
+  prompt: 'Which grew fastest in 2023: India, Indonesia or Saudi Arabia?'
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: gdp-growth-annual-percent
+      countries:
+      - IND
+      - IDN
+      - SAU
+      year: 2023
+  also_ok:
+  - real-gdp-growth
+- skill: compare-economies
+  category: macroeconomics
+  prompt: Compare government debt to GDP in Italy, Greece and Portugal.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: gross-government-debt
+      countries:
+      - ITA
+      - GRC
+      - PRT
+  also_ok:
+  - government-debt-percent-gdp
+- skill: compare-economies
+  category: financial markets
+  prompt: Compare stock trading as a share of GDP in the US, Japan and the UK.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: wdi-cm-mkt-trad-gd-zs
+      countries:
+      - USA
+      - JPN
+      - GBR
+- skill: compare-economies
+  category: financial markets
+  prompt: Rank Brazil, India and South Africa by broad money as a share of GDP.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: broad-money-percent-gdp
+      countries:
+      - BRA
+      - IND
+      - ZAF
+- skill: compare-economies
+  category: financial markets
+  prompt: Compare real interest rates in Indonesia, the Philippines and Thailand.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: real-interest-rates
+      countries:
+      - IDN
+      - PHL
+      - THA
+- skill: compare-economies
+  category: labor
+  prompt: Compare unemployment in France, Germany and Spain.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: unemployment-ilo-estimates
+      countries:
+      - FRA
+      - DEU
+      - ESP
+  also_ok:
+  - unemployment-rate
+- skill: compare-economies
+  category: labor
+  prompt: 'Which has the highest minimum wage: France, Germany or the Netherlands?'
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: minimum-wage
+      countries:
+      - FRA
+      - DEU
+      - NLD
+- skill: compare-economies
+  category: labor
+  prompt: Compare long-term unemployment in Italy, Spain and Greece.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: long-term-unemployment
+      countries:
+      - ITA
+      - ESP
+      - GRC
+- skill: compare-economies
+  category: demographics
+  prompt: Compare net migration rates in Canada, Australia and Germany.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: net-migration-rate
+      countries:
+      - CAN
+      - AUS
+      - DEU
+- skill: compare-economies
+  category: demographics
+  prompt: Rank Japan, Italy and Germany by population growth.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: population-growth-annual-percent
+      countries:
+      - JPN
+      - ITA
+      - DEU
+- skill: compare-economies
+  category: demographics
+  prompt: Compare the urban population share in China, India and Brazil.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: urban-population-percent
+      countries:
+      - CHN
+      - IND
+      - BRA
+- skill: compare-economies
+  category: real estate
+  prompt: Compare real house prices in the UK, France and Italy.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: real-residential-property-prices
+      countries:
+      - GBR
+      - FRA
+      - ITA
+  also_ok:
+  - nominal-residential-property-prices
+- skill: compare-economies
+  category: real estate
+  prompt: 'Where have nominal house prices risen most: Sweden, Norway or Denmark?'
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: nominal-residential-property-prices
+      countries:
+      - SWE
+      - NOR
+      - DNK
+  also_ok:
+  - real-residential-property-prices
+- skill: compare-economies
+  category: real estate
+  prompt: Compare real house prices in Japan and South Korea.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: real-residential-property-prices
+      countries:
+      - JPN
+      - KOR
+  also_ok:
+  - nominal-residential-property-prices
+- skill: compare-economies
+  category: commodities and energy
+  prompt: Compare the renewable share of electricity output in Norway, Brazil and Canada.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: wdi-eg-elc-rnew-zs
+      countries:
+      - NOR
+      - BRA
+      - CAN
+- skill: compare-economies
+  category: commodities and energy
+  prompt: Rank India, Bangladesh and Pakistan by access to electricity.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: access-to-electricity-percent
+      countries:
+      - IND
+      - BGD
+      - PAK
+- skill: compare-economies
+  category: commodities and energy
+  prompt: Compare net energy imports as a share of energy use in Japan, Germany and Italy.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: wdi-eg-imp-cons-zs
+      countries:
+      - JPN
+      - DEU
+      - ITA
+- skill: compare-economies
+  category: transport and logistics
+  prompt: Compare the rail network length in France, Germany and Italy.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: wdi-is-rrs-totl-km
+      countries:
+      - FRA
+      - DEU
+      - ITA
+- skill: compare-economies
+  category: transport and logistics
+  prompt: Rank China, Japan and South Korea by container port traffic.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: container-throughput-teu
+      countries:
+      - CHN
+      - JPN
+      - KOR
+- skill: compare-economies
+  category: transport and logistics
+  prompt: Compare railway passenger traffic in India, China and Japan.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: wdi-is-rrs-pasg-km
+      countries:
+      - IND
+      - CHN
+      - JPN
+- skill: compare-economies
+  category: healthcare
+  prompt: Compare infant mortality in Nigeria, Pakistan and India.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: infant-mortality-rate
+      countries:
+      - NGA
+      - PAK
+      - IND
+- skill: compare-economies
+  category: healthcare
+  prompt: Rank France, Germany and Sweden by health spending per person.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: healthcare-expenditure-per-capita
+      countries:
+      - FRA
+      - DEU
+      - SWE
+- skill: compare-economies
+  category: healthcare
+  prompt: Compare the crude death rate in Russia, Ukraine and Bulgaria.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: crude-death-rate
+      countries:
+      - RUS
+      - UKR
+      - BGR
+- skill: compare-economies
+  category: education
+  prompt: Compare youth literacy in Mali, Chad and Niger.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: literacy-rate-youth
+      countries:
+      - MLI
+      - TCD
+      - NER
+- skill: compare-economies
+  category: education
+  prompt: Rank Germany, France and the UK by tertiary enrollment.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: school-enrollment-tertiary
+      countries:
+      - DEU
+      - FRA
+      - GBR
+- skill: compare-economies
+  category: education
+  prompt: Compare adult literacy in Bangladesh, Nepal and Pakistan.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: literacy-rate-adult
+      countries:
+      - BGD
+      - NPL
+      - PAK
+- skill: compare-economies
+  category: technology and internet
+  prompt: Compare mobile subscriptions per 100 people in Nigeria, Kenya and Ghana.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: mobile-penetration-rate
+      countries:
+      - NGA
+      - KEN
+      - GHA
+  also_ok:
+  - mobile-cellular-subscriptions-per-100-people
+- skill: compare-economies
+  category: technology and internet
+  prompt: Rank the US, the UK and France by internet use.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: internet-penetration-rate
+      countries:
+      - USA
+      - GBR
+      - FRA
+  also_ok:
+  - individuals-using-the-internet-of-population
+- skill: compare-economies
+  category: technology and internet
+  prompt: Compare secure internet servers per million people in Estonia, Finland and Denmark.
+  call: true
+  checks:
+  - tool: compare_countries
+    args:
+      indicator: wdi-it-net-secr-p6
+      countries:
+      - EST
+      - FIN
+      - DNK
 - skill: cite-economic-data
+  category: macroeconomics
   prompt: I need an APA citation for Germany's CPI inflation data.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: cpi-inflation
+      country: DEU
+  also_ok:
+  - cpi-inflation-rate-percent
 - skill: cite-economic-data
-  prompt: Where does the figure for India's adult literacy rate come from? I need the source for my paper.
-- skill: cite-economic-data
+  category: macroeconomics
   prompt: Someone told me Japan's government debt is 250% of GDP. Can you verify it and give me the source?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: gross-government-debt
+      country: JPN
+  also_ok:
+  - government-debt-percent-gdp
+- skill: cite-economic-data
+  category: financial markets
+  prompt: What is the source of the Nasdaq index data, and how should I cite it?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: nasdaq-index
+      country: USA
+  any_country: true
+- skill: cite-economic-data
+  category: financial markets
+  prompt: Cite the 6-month Euribor series for my thesis.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: euribor-6-month
+      country: EUR
+  any_country: true
+- skill: cite-economic-data
+  category: labor
+  prompt: Where does the US nonfarm payrolls number come from? I need a reference.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: nonfarm-payrolls-us
+      country: USA
+  any_country: true
+- skill: cite-economic-data
+  category: labor
+  prompt: Give me a citation for South Africa's youth unemployment rate.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: youth-unemployment-15-24
+      country: ZAF
+- skill: cite-economic-data
+  category: demographics
+  prompt: Cite the source for Nigeria's population in 2023.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: total-population
+      country: NGA
+- skill: cite-economic-data
+  category: demographics
+  prompt: I read that Japan's median age is 49. Is that right, and what is the source?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: median-age
+      country: JPN
+- skill: cite-economic-data
+  category: real estate
+  prompt: What is the source of the US house price index data? I need to cite it.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: house-price-index-hpi
+      country: USA
+  any_country: true
+- skill: cite-economic-data
+  category: real estate
+  prompt: Cite the US 30-year fixed mortgage rate data.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: mortgage-rates-30y-fixed
+      country: USA
+  also_ok:
+  - mortgage-rates
+  any_country: true
+- skill: cite-economic-data
+  category: commodities and energy
+  prompt: I need a proper citation for Brent crude oil price data.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: brent-oil
+      country: GLB
+  any_country: true
+- skill: cite-economic-data
+  category: commodities and energy
+  prompt: Where does the gold price series come from, and under what licence?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: gold
+      country: GLB
+  any_country: true
+- skill: cite-economic-data
+  category: transport and logistics
+  prompt: Cite the container port traffic figure for Singapore in 2023.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: container-throughput-teu
+      country: SGP
+- skill: cite-economic-data
+  category: transport and logistics
+  prompt: Where does the number of air passengers carried in Turkey come from?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: wdi-is-air-psgr
+      country: TUR
+- skill: cite-economic-data
+  category: healthcare
+  prompt: Give me an APA citation for life expectancy in India.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: life-expectancy-at-birth
+      country: IND
+- skill: cite-economic-data
+  category: healthcare
+  prompt: Is it true that the US spends about 17% of GDP on health care? Source please.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: healthcare-expenditure-percent-gdp
+      country: USA
+- skill: cite-economic-data
+  category: education
+  prompt: Where does the figure for India's adult literacy rate come from? I need the source for my paper.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: literacy-rate-adult
+      country: IND
+- skill: cite-economic-data
+  category: education
+  prompt: Cite the tertiary enrollment rate for South Korea.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: school-enrollment-tertiary
+      country: KOR
+- skill: cite-economic-data
+  category: technology and internet
+  prompt: What is the source and licence of the internet usage data for India?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: internet-penetration-rate
+      country: IND
+  also_ok:
+  - individuals-using-the-internet-of-population
+- skill: cite-economic-data
+  category: technology and internet
+  prompt: Cite mobile cellular subscriptions per 100 people in Nigeria.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: mobile-penetration-rate
+      country: NGA
+  also_ok:
+  - mobile-cellular-subscriptions-per-100-people
+- skill: cite-economic-data
+  category: macroeconomics
+  prompt: Give me the source for Mexico's GDP per capita.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: gdp-per-capita
+      country: MEX
+  also_ok:
+  - gdp-per-capita-imf
+- skill: cite-economic-data
+  category: macroeconomics
+  prompt: Is Turkey's inflation really above 40%? Cite your source.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: cpi-inflation-rate-percent
+      country: TUR
+  also_ok:
+  - cpi-inflation
+- skill: cite-economic-data
+  category: macroeconomics
+  prompt: Cite Germany's current account balance as a share of GDP.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: current-account-balance-2
+      country: DEU
+  also_ok:
+  - current-account-balance
+- skill: cite-economic-data
+  category: financial markets
+  prompt: Cite the yen to US dollar exchange rate for 2024.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: exchange-rate-lcu-per-usd
+      country: JPN
+- skill: cite-economic-data
+  category: financial markets
+  prompt: Where does the crypto fear and greed index data come from?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: fear-and-greed-index
+      country: GLB
+  any_country: true
+- skill: cite-economic-data
+  category: financial markets
+  prompt: Cite the lending interest rate for Kenya.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: consumer-rates
+      country: KEN
+- skill: cite-economic-data
+  category: labor
+  prompt: Cite the minimum wage figure for Turkey.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: minimum-wage
+      country: TUR
+- skill: cite-economic-data
+  category: labor
+  prompt: What is the source for labor force participation in India?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: labor-force-participation-rate
+      country: IND
+  also_ok:
+  - labor-force-participation-ilo-estimates
+- skill: cite-economic-data
+  category: labor
+  prompt: Give me a citation for Germany's unemployment rate.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: unemployment-ilo-estimates
+      country: DEU
+  also_ok:
+  - unemployment-rate
+- skill: cite-economic-data
+  category: demographics
+  prompt: Cite the total fertility rate for South Korea.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: total-fertility-rate-tfr
+      country: KOR
+- skill: cite-economic-data
+  category: demographics
+  prompt: Where does the population density figure for Bangladesh come from?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: population-density
+      country: BGD
+- skill: cite-economic-data
+  category: demographics
+  prompt: Is Nigeria's median age really under 20? Source please.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: median-age
+      country: NGA
+- skill: cite-economic-data
+  category: real estate
+  prompt: Cite the US median home price data.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: median-home-price
+      country: USA
+  any_country: true
+- skill: cite-economic-data
+  category: real estate
+  prompt: Where does the US mortgage delinquency rate come from?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: mortgage-delinquency-rate
+      country: USA
+  any_country: true
+- skill: cite-economic-data
+  category: real estate
+  prompt: Cite real residential property prices for Canada.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: real-residential-property-prices
+      country: CAN
+  also_ok:
+  - nominal-residential-property-prices
+- skill: cite-economic-data
+  category: commodities and energy
+  prompt: Cite the copper price series.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: copper
+      country: USA
+  any_country: true
+- skill: cite-economic-data
+  category: commodities and energy
+  prompt: Where does the TTF natural gas data come from?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: ttf-natural-gas
+      country: GLB
+  any_country: true
+- skill: cite-economic-data
+  category: commodities and energy
+  prompt: Cite the FAO dairy price index.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: fao-dairy-price-index
+      country: GLB
+  any_country: true
+- skill: cite-economic-data
+  category: transport and logistics
+  prompt: Cite air passengers carried in the UAE in 2019.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: wdi-is-air-psgr
+      country: ARE
+- skill: cite-economic-data
+  category: transport and logistics
+  prompt: What is the source for China's container port throughput?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: container-throughput-teu
+      country: CHN
+- skill: cite-economic-data
+  category: transport and logistics
+  prompt: Cite railway goods transport in Russia.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: wdi-is-rrs-good-mt-k6
+      country: RUS
+- skill: cite-economic-data
+  category: healthcare
+  prompt: Cite the infant mortality rate in Brazil.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: infant-mortality-rate
+      country: BRA
+- skill: cite-economic-data
+  category: healthcare
+  prompt: Where does the life expectancy figure for Nigeria come from?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: life-expectancy-at-birth
+      country: NGA
+- skill: cite-economic-data
+  category: healthcare
+  prompt: Cite health spending per person in the United States.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: healthcare-expenditure-per-capita
+      country: USA
+- skill: cite-economic-data
+  category: education
+  prompt: Cite the youth literacy rate in Nigeria.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: literacy-rate-youth
+      country: NGA
+- skill: cite-economic-data
+  category: education
+  prompt: Where does Brazil's tertiary enrollment figure come from?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: school-enrollment-tertiary
+      country: BRA
+- skill: cite-economic-data
+  category: education
+  prompt: Is Egypt's adult literacy rate about 70%? Give the source.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: literacy-rate-adult
+      country: EGY
+- skill: cite-economic-data
+  category: technology and internet
+  prompt: Cite fixed broadband subscriptions in Germany.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: broadband-subscriptions-fixed
+      country: DEU
+- skill: cite-economic-data
+  category: technology and internet
+  prompt: What is the source for internet use in Nigeria?
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: internet-penetration-rate
+      country: NGA
+  also_ok:
+  - individuals-using-the-internet-of-population
+- skill: cite-economic-data
+  category: technology and internet
+  prompt: Cite mobile penetration in India.
+  call: true
+  checks:
+  - tool: get_indicator_series
+    args:
+      indicator: mobile-penetration-rate
+      country: IND
+  also_ok:
+  - mobile-cellular-subscriptions-per-100-people
+- skill: null
+  category: transport and logistics
+  prompt: What does TEU mean in shipping?
+  call: false
+- skill: null
+  category: transport and logistics
+  prompt: Summarize the history of the Suez Canal.
+  call: false
+- skill: null
+  category: real estate
+  prompt: Explain how a 30-year fixed mortgage works.
+  call: false
+- skill: null
+  category: labor
+  prompt: Explain the difference between unemployment and underemployment.
+  call: false
+- skill: null
+  category: demographics
+  prompt: Explain what the total fertility rate measures.
+  call: false
+- skill: null
+  category: macroeconomics
+  prompt: Why do central banks raise interest rates?
+  call: false
+- skill: null
+  category: commodities and energy
+  prompt: What is the difference between Brent and WTI crude oil?
+  call: false
+- skill: null
+  category: technology and internet
+  prompt: How does fixed broadband differ technically from mobile internet?
+  call: false
+- skill: null
+  category: education
+  prompt: What are the main causes of low adult literacy?
+  call: false
+- skill: null
+  category: healthcare
+  prompt: What is the difference between life expectancy and lifespan?
+  call: false
+- skill: null
+  category: citation
+  prompt: How do I format a citation for a dataset in APA 7th edition?
+  call: false
+- skill: null
+  category: comparison
+  prompt: Write a Python function that ranks countries by a value stored in a dict.
+  call: false

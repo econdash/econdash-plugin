@@ -11,7 +11,7 @@ A table of two or more countries on the same indicator from EconDash, with the p
 
 1. **Indicator.** Call `search_indicators` with the topic in short English keywords, for example "life expectancy" or "debt to gdp". Pick the result that fits the question:
    - a ratio (% of GDP, per capita, per 1,000 people) compares countries of different size; an absolute amount (current USD, persons) compares size;
-   - the `countries` count in the result: a series that covers one country, such as many FRED, BLS and Eurostat series, cannot be compared across countries;
+   - the `countries` count in the result: a series that covers one country, such as many FRED, BLS and Eurostat series, cannot be compared across countries. Commodity quotes and market indices are stored under one code (`country_codes` in the result, such as `GLB`); compare them over time with `get_indicator_series`;
    - a vague topic, such as "debt" (government, household or external), needs a choice: ask the user, or pick one and name it in the answer.
 2. **Country codes.** The tools take ISO 3166-1 alpha-3 codes. For a group such as "G7" or "the Nordics", list the member codes and say in the answer which countries were included. `list_countries` lists all codes, including aggregates such as `EUU` (European Union) and `WLD` (world).
 3. **One point in time.** Call `compare_countries` with `indicator`, `countries` (up to 20 per call) and `year`. Without `year`, it returns the latest observed value of each country.

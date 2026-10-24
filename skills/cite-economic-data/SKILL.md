@@ -1,6 +1,6 @@
 ---
 name: cite-economic-data
-description: Use when the user needs a citation, a source, or wants to verify where an economic figure comes from.
+description: Use when the user needs a citation, a source, or wants to verify where an economic or social statistic comes from.
 ---
 
 # Cite an EconDash figure
@@ -11,7 +11,7 @@ A citation that names the original publisher, EconDash as the place the data was
 
 1. **Indicator.** If the slug is not known from an earlier tool result in this conversation, find it with `search_indicators`.
 2. **Metadata.** Call `get_indicator_details` with the slug. It returns `name`, `publisher`, `source_url`, `license`, `license_url`, `attribution` and `data_changed_at`.
-3. **Country and figure.** When the citation is for one country, call `get_indicator_series` with `indicator`, `country` and, for one figure, `year`. It returns the value, `country_name` and the `chart_url` of the country page, for example `https://econdash.org/chart/cpi-inflation/DEU`.
+3. **Country and figure.** When the citation is for one country, call `get_indicator_series` with `indicator`, `country` and, for one figure, `year`. It returns the value, `country_name` and the `chart_url` of the country page, for example `https://econdash.org/chart/cpi-inflation/DEU`. A commodity quote or a market index is stored under one code, listed in `country_codes` of the search result: `GLB` for Brent oil, `USA` for the Nasdaq.
 4. **Checking a figure.** When the user quotes a number, compare it with the returned value, unit and year, and say whether they match. Revisions by the publisher can explain small differences; `data_changed_at` shows when the series last changed.
 5. **No match.** If no EconDash indicator covers the figure, say so. A citation names EconDash only for data the tools returned.
 

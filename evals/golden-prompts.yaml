@@ -785,6 +785,8 @@ prompts:
   source: 'gsc: teu'
   prompt: Container port traffic in Singapore in 2023
   call: true
+  also_ok:
+  - container-throughput-teu
   checks:
   - tool: get_indicator_series
     args:
@@ -887,6 +889,8 @@ prompts:
   source: 'gsc: cellular subscriptions in us'
   prompt: Mobile cellular subscriptions per 100 people in the US
   call: true
+  also_ok:
+  - mobile-penetration-rate
   checks:
   - tool: get_indicator_series
     args:

@@ -4,7 +4,7 @@ All notable changes to this plugin are listed here. Versions follow [Semantic Ve
 
 ## Unreleased
 
-- Skills `macro-research`, `compare-economies` and `cite-economic-data` in `skills/`, with indicator coverage notes and citation formats in `references/`. `evals/skill-prompts.yaml` lists the questions each skill is written for.
+- Skills `macro-research`, `compare-economies` and `cite-economic-data` in `skills/`, with indicator coverage notes and citation formats in `references/`. `evals/skill-prompts.yaml`: 117 questions the skills are written for, covering all ten categories, with near misses where no skill should load.
 - Golden prompt set `evals/golden-prompts.yaml`: 60 English and 10 Russian questions (direct, indirect, negative, edge) with expected tool calls and recorded values, to measure when a model calls EconDash.
 
 ## 0.1.0
