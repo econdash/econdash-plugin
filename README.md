@@ -41,6 +41,18 @@ The assistant gets these tools from the server:
 | `get_indicator_details` | Description, unit, source, licence and coverage of an indicator |
 | `list_countries` | Countries and regions as ISO 3166-1 alpha-3 codes |
 
+## Skills
+
+The plugin also carries three skills: short instructions that show the assistant which tools to call, in which order, for common tasks. They are plain Markdown in [`skills/`](skills).
+
+| Skill | When it is used |
+| --- | --- |
+| `macro-research` | An overview of one country's economy: growth, income, inflation, unemployment, debt, external balance |
+| `compare-economies` | Two or more countries on one indicator, or a ranking |
+| `cite-economic-data` | A citation for a figure, its source and licence, or a check of a quoted number |
+
+Claude Code loads the skills with the plugin, and Grok Build reads the same plugin format. Gemini CLI does not load skills; it reads `GEMINI.md`.
+
 ## Install
 
 ### Claude Code

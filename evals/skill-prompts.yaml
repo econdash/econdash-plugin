@@ -1,0 +1,25 @@
+# Questions that each skill in skills/ is written for.
+#
+# A run passes when the model loads the named skill for each of its prompts and loads no
+# skill for the negative prompts in golden-prompts.yaml. The data in the answer is graded
+# with golden-prompts.yaml, not here.
+
+prompts:
+- skill: macro-research
+  prompt: Give me a macro snapshot of Brazil.
+- skill: macro-research
+  prompt: "How is the Turkish economy doing? Growth, inflation, jobs and debt."
+- skill: macro-research
+  prompt: Quick overview of Poland's economy over the last decade.
+- skill: compare-economies
+  prompt: Rank the Nordic countries by GDP per capita.
+- skill: compare-economies
+  prompt: Compare life expectancy in Japan, Italy and Spain.
+- skill: compare-economies
+  prompt: Which BRICS country has the highest inflation?
+- skill: cite-economic-data
+  prompt: I need an APA citation for Germany's CPI inflation data.
+- skill: cite-economic-data
+  prompt: Where does the figure for India's adult literacy rate come from? I need the source for my paper.
+- skill: cite-economic-data
+  prompt: Someone told me Japan's government debt is 250% of GDP. Can you verify it and give me the source?

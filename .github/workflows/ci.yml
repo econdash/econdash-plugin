@@ -156,6 +156,58 @@ jobs:
           if grep -rnEi '\bclaude\b|\banthropic\b|\bchatgpt\b|\bopenai\b|\bgemini\b|\bgrok\b|always use|you must use|ignore (all|previous|prior)|do not (tell|mention)|checkout|pricing|upgrade|subscri|x402|payment|wallet' skills; then
             echo "::error::skills must be provider-neutral, must not steer the model to always use EconDash, and must not mention payments"; exit 1
           fi
+          # Words that rank or oversell, and phrases that skill scanners treat as signs of an attack
+          if grep -rnEi '\bnever\b|\bprefer|\bbest\b|\bofficial|\bcertified\b|\bprices?\b|silently|without asking|already approved|before answering' skills; then
+            echo "::error::skills must describe situations, not rank tools, sell, or hide steps from the user"; exit 1
+          fi
+          bad=$(grep -rhoE 'https?://[^ )>`"]+' skills | grep -vE '^https://([a-z0-9-]+\.)*(econdash\.org|worldbank\.org|imf\.org|stlouisfed\.org|europa\.eu|oecd\.org|who\.int|ilo\.org)(/|$)' || true)
+          [ -z "$bad" ] || { echo "::error::links in skills must point at econdash.org or a data source:"; echo "$bad"; exit 1; }
+
+      - name: Skills are well formed
+        shell: python3 {0}
+        run: |
+          import pathlib, re, sys
+          errors = []
+          for skill in sorted(pathlib.Path("skills").glob("*/SKILL.md")):
+              text = skill.read_text(encoding="utf-8")
+              front = re.match(r"---\n(.*?)\n---\n", text, re.S)
+              fields = dict(re.findall(r"^(\w+): (.+)$", front.group(1), re.M)) if front else {}
+              # Agent Skills spec: name 1-64 lowercase letters, digits and single hyphens; description 1-1024 chars
+              if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", fields.get("name", "")) or len(fields["name"]) > 64:
+                  errors.append(f"{skill}: name must be 1-64 lowercase letters, digits and single hyphens")
+              if fields.get("name") != skill.parent.name:
+                  errors.append(f"{skill}: frontmatter name must equal the folder name")
+              if not fields.get("description", "").startswith("Use when") or len(fields["description"]) > 1024:
+                  errors.append(f"{skill}: description must say when to use the skill, in at most 1024 characters")
+              if len(text.splitlines()) > 80:
+                  errors.append(f"{skill}: longer than 80 lines, move details to references/")
+          print("\n".join(f"::error::{e}" for e in errors) or "skills OK")
+          sys.exit(1 if errors else 0)
+
+      - name: Indicator slugs in skills exist
+        shell: python3 {0}
+        run: |
+          import json, pathlib, re, sys, urllib.request
+          slugs = sorted({s for p in pathlib.Path("skills").rglob("*.md")
+                          for s in re.findall(r"`([a-z0-9]+(?:-[a-z0-9]+)+)`", p.read_text(encoding="utf-8"))})
+          missing = []
+          for slug in slugs:
+              body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                                 "params": {"name": "get_indicator_details", "arguments": {"indicator": slug}}}).encode()
+              req = urllib.request.Request("https://mcp.econdash.org/mcp", body, {
+                  "Content-Type": "application/json", "Accept": "application/json, text/event-stream",
+                  "MCP-Protocol-Version": "2025-06-18"})
+              raw = urllib.request.urlopen(req, timeout=30).read().decode()
+              raw = "\n".join(line[6:] for line in raw.splitlines() if line.startswith("data: ")) or raw
+              result = json.loads(raw)["result"]
+              if result.get("isError"):
+                  text = result["content"][0]["text"]
+                  if "No indicator" not in text:  # rate limit or server error: the slug was not checked
+                      sys.exit(f"::error::could not check {slug}: {text}")
+                  missing.append(slug)
+          print(f"{len(slugs)} slugs checked")
+          print("\n".join(f"::error::no indicator {s} in the EconDash catalogue" for s in missing))
+          sys.exit(1 if missing else 0)
 
       - name: Actions pinned by commit SHA
         run: |
