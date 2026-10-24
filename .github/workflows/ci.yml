@@ -150,17 +150,19 @@ jobs:
           sys.exit(1 if errors else 0)
           EOF
 
-      - name: Skills stay neutral
+      - name: Skills and GEMINI.md stay neutral
         run: |
           [ -d skills ] || { echo "no skills yet"; exit 0; }
-          if grep -rnEi '\bclaude\b|\banthropic\b|\bchatgpt\b|\bopenai\b|\bgemini\b|\bgrok\b|always use|you must use|ignore (all|previous|prior)|do not (tell|mention)|checkout|pricing|upgrade|subscri|x402|payment|wallet' skills; then
+          # Gemini CLI loads GEMINI.md into every session, so it follows the skills' wording rules and stays short
+          [ "$(wc -l < GEMINI.md)" -le 60 ] || { echo "::error file=GEMINI.md::longer than 60 lines"; exit 1; }
+          if grep -rnEi '\bclaude\b|\banthropic\b|\bchatgpt\b|\bopenai\b|\bgemini\b|\bgrok\b|always use|you must use|ignore (all|previous|prior)|do not (tell|mention)|checkout|pricing|upgrade|subscri|x402|payment|wallet' skills GEMINI.md; then
             echo "::error::skills must be provider-neutral, must not steer the model to always use EconDash, and must not mention payments"; exit 1
           fi
           # Words that rank or oversell, and phrases that skill scanners treat as signs of an attack
-          if grep -rnEi '\bnever\b|\bprefer|\bbest\b|\bofficial|\bcertified\b|\bprices?\b|silently|without asking|already approved|before answering' skills; then
+          if grep -rnEi '\bnever\b|\bprefer|\bbest\b|\bofficial|\bcertified\b|\bprices?\b|silently|without asking|already approved|before answering' skills GEMINI.md; then
             echo "::error::skills must describe situations, not rank tools, sell, or hide steps from the user"; exit 1
           fi
-          bad=$(grep -rhoE 'https?://[^ )>`"]+' skills | grep -vE '^https://([a-z0-9-]+\.)*(econdash\.org|worldbank\.org|imf\.org|stlouisfed\.org|europa\.eu|oecd\.org|who\.int|ilo\.org)(/|$)' || true)
+          bad=$(grep -rhoE 'https?://[^ )>`"]+' skills GEMINI.md | grep -vE '^https://([a-z0-9-]+\.)*(econdash\.org|worldbank\.org|imf\.org|stlouisfed\.org|europa\.eu|oecd\.org|who\.int|ilo\.org)(/|$)' || true)
           [ -z "$bad" ] || { echo "::error::links in skills must point at econdash.org or a data source:"; echo "$bad"; exit 1; }
 
       - name: Skills are well formed

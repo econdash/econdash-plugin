@@ -51,7 +51,7 @@ The plugin also carries three skills: short instructions that show the assistant
 | `compare-economies` | Two or more countries on one indicator, or a ranking |
 | `cite-economic-data` | A citation for a figure, its source and licence, or a check of a quoted number |
 
-Claude Code loads the skills with the plugin, and Grok Build reads the same plugin format. Gemini CLI does not load skills; it reads `GEMINI.md`.
+Claude Code loads the skills with the plugin, and Grok Build reads the same plugin format. Gemini CLI loads them from the extension as well and also reads `GEMINI.md`, a short map of the tools.
 
 ## Install
 
