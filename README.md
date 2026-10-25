@@ -62,6 +62,13 @@ Claude Code loads the skills with the plugin, and Grok Build reads the same plug
 /plugin install econdash@econdash
 ```
 
+### Claude apps (claude.ai, Desktop, Cowork)
+
+1. **Customize → Plugins → Add → Add marketplace**, enter `econdash/econdash-plugin`, then add **econdash**.
+2. Open the plugin and its **Connectors** tab, and add or connect **EconDash**. Adding a plugin does not connect its server: without this step the assistant has the skills but no EconDash tools. If you already have an EconDash custom connector, it is the same server; keep it turned on.
+
+With web search turned on, Claude often answers data questions from the web. Name EconDash in the question ("According to EconDash, …") to get the figures from it.
+
 ### Grok Build
 
 ```
@@ -83,7 +90,7 @@ gemini extensions install https://github.com/econdash/econdash-plugin
 
 ### Other assistants
 
-ChatGPT, Claude apps, grok.com, Cursor, VS Code and other MCP clients can connect to the server URL directly. Step-by-step instructions are in the [MCP documentation](https://econdash.org/docs/mcp).
+ChatGPT, Claude apps (without the plugin), grok.com, Cursor, VS Code and other MCP clients can connect to the server URL directly. Step-by-step instructions are in the [MCP documentation](https://econdash.org/docs/mcp).
 
 ## What data it sends
 
