@@ -1,5 +1,5 @@
 {
-  "instructions": "EconDash serves economic indicators from World Bank, IMF, FRED, Eurostat, ECB, OECD, WHO and other public sources for countries and regions. search_indicators finds the indicator slug that the data tools take as input. Countries and regions are ISO 3166-1 alpha-3 codes, listed by list_countries.",
+  "instructions": "EconDash is a catalogue of statistical indicators in ten categories: macroeconomics, financial markets, labour, demographics, real estate, commodities and energy, transport and logistics, healthcare, education, technology and internet, for countries and regions, from the World Bank, IMF, FRED, Eurostat, ECB, OECD, WHO and other public sources. Every value comes with its period, unit, source, licence and a chart link; a period without data is reported as missing, not filled in. search_indicators finds the indicator slug that the data tools take as input. Countries and regions are ISO 3166-1 alpha-3 codes, listed by list_countries.",
   "tools": [
     {
       "_meta": {
@@ -304,7 +304,7 @@
         "readOnlyHint": true,
         "title": "Search economic indicators"
       },
-      "description": "Searches the EconDash catalogue of economic, financial, demographic and social indicators by keyword. Returns up to 25 matches with the slug, name, unit, frequency, source and years covered. The slug is the input for get_indicator_series, compare_countries and get_indicator_details. The catalogue has no series for individual shares or cryptocurrencies (only the Crypto Fear & Greed Index), tax rates, steel or the Baltic Dry Index.",
+      "description": "Searches the EconDash catalogue by keyword, for example GDP and growth, inflation, unemployment and wages, population, life expectancy, interest and exchange rates, government debt, trade, house prices, oil, gold and metal prices, stock indices, energy, health, education and internet use. Use it when the user asks for a statistic for a country or region: its latest value, history or a comparison. Returns up to 25 matches with the slug, name, unit, frequency, source and years covered. The slug is the input for get_indicator_series, compare_countries and get_indicator_details. The catalogue has no series for individual shares or cryptocurrencies (only the Crypto Fear & Greed Index), tax rates, steel or the Baltic Dry Index.",
       "inputSchema": {
         "properties": {
           "limit": {

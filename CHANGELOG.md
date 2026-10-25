@@ -5,6 +5,7 @@ All notable changes to this plugin are listed here. Versions follow [Semantic Ve
 ## Unreleased
 
 - Server: `get_full_series` returns up to 1500 values per call instead of 2500, so the largest result stays under Claude Code's 25,000-token limit for tool output. Ask for earlier periods with `end_year`. `evals/tools-list.json` updated.
+- Server: the instructions and the `search_indicators` description now say what the catalogue holds (the ten categories and typical topics) and that every value comes with its source, licence and chart link. With web search available, models called EconDash on more data questions that do not name it. `evals/tools-list.json` updated.
 
 ## 0.3.0
 
