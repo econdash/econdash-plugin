@@ -4,6 +4,8 @@ All notable changes to this plugin are listed here. Versions follow [Semantic Ve
 
 ## Unreleased
 
+- Server: `get_full_series` returns up to 1500 values per call instead of 2500, so the largest result stays under Claude Code's 25,000-token limit for tool output. Ask for earlier periods with `end_year`. `evals/tools-list.json` updated.
+
 ## 0.3.0
 
 - Grok Build: `.grok-plugin/marketplace.json`, so the repository works as a Grok Build marketplace (`grok plugin install econdash@econdash-plugin`). Grok Build rejects a plugin at the marketplace root (`"source": "./"`), so this copy points at the repository URL; Claude Code keeps reading `.claude-plugin/marketplace.json`. CI keeps the two files equal apart from the source.

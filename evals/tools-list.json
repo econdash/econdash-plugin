@@ -83,7 +83,7 @@
         "readOnlyHint": true,
         "title": "Get full indicator history"
       },
-      "description": "Returns the whole history of one indicator for one country or region, up to 2500 values per call, for people signed in to EconDash with full data access; other signed-in accounts get as many values as get_indicator_series. Needs sign-in to EconDash. Without years: the history up to the latest observed value, with the nearest projection in next_projection. With start_year and/or end_year: the values in that range, the latest ones and truncated true when it holds more. Same fields as get_indicator_series. Country is an ISO 3166-1 alpha-3 code.",
+      "description": "Returns the whole history of one indicator for one country or region, up to 1500 values per call, for people signed in to EconDash with full data access; other signed-in accounts get as many values as get_indicator_series. Needs sign-in to EconDash. Without years: the history up to the latest observed value, with the nearest projection in next_projection. With start_year and/or end_year: the values in that range, the latest ones and truncated true when it holds more. Same fields as get_indicator_series. Country is an ISO 3166-1 alpha-3 code.",
       "inputSchema": {
         "properties": {
           "country": {
