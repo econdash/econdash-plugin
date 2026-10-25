@@ -68,6 +68,13 @@ Claude Code loads the skills with the plugin, and Grok Build reads the same plug
 grok plugin install https://github.com/econdash/econdash-plugin
 ```
 
+Or add the repository as a marketplace and install from it, also from the **Marketplace** tab of `/plugins`. Grok Build names the marketplace after the repository:
+
+```
+grok plugin marketplace add econdash/econdash-plugin
+grok plugin install econdash@econdash-plugin
+```
+
 ### Gemini CLI
 
 ```

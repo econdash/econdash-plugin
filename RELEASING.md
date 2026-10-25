@@ -56,3 +56,5 @@ Write down how long each step took; the next release plan depends on it.
 ## Once a month
 
 Check that every listing shows the same version: Claude (**Versions** tab), the `sha` in `xai-org/plugin-marketplace`, the ChatGPT package version, the latest GitHub Release, the MCP Registry entry.
+
+Also open the repository's **Actions** tab: GitHub disables scheduled workflows in a public repository after 60 days without activity, and the weekly tool description check then stops without an error. Re-enable it there if it is off.

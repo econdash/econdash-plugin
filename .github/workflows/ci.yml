@@ -42,6 +42,12 @@ jobs:
             || { echo "::error file=gemini-extension.json::unexpected keys or values"; exit 1; }
           jq -e '.name == "econdash" and .plugins == [.plugins[0]] and .plugins[0].name == "econdash" and .plugins[0].source == "./"' .claude-plugin/marketplace.json \
             || { echo "::error file=.claude-plugin/marketplace.json::must list exactly one plugin, econdash, at ./"; exit 1; }
+          # Grok Build rejects a plugin at the marketplace root ("./"), so its copy points at the repository URL
+          jq -e --slurpfile c .claude-plugin/marketplace.json '
+            . == ($c[0] | {name, description, owner, plugins}
+                  | .plugins[0].source = {"source": "url", "url": "https://github.com/econdash/econdash-plugin.git"})
+          ' .grok-plugin/marketplace.json \
+            || { echo "::error file=.grok-plugin/marketplace.json::must equal .claude-plugin/marketplace.json with the source set to the repository URL"; exit 1; }
           claude_version=$(jq -r .version .claude-plugin/plugin.json)
           gemini_version=$(jq -r .version gemini-extension.json)
           [ "$claude_version" = "$gemini_version" ] \

@@ -4,6 +4,9 @@ All notable changes to this plugin are listed here. Versions follow [Semantic Ve
 
 ## Unreleased
 
+- Grok Build: `.grok-plugin/marketplace.json`, so the repository works as a Grok Build marketplace (`grok plugin install econdash@econdash-plugin`). Grok Build rejects a plugin at the marketplace root (`"source": "./"`), so this copy points at the repository URL; Claude Code keeps reading `.claude-plugin/marketplace.json`. CI keeps the two files equal apart from the source.
+- `RELEASING.md`: the monthly check also confirms that the weekly CI run is still enabled.
+
 ## 0.2.0
 
 - Releases: `RELEASING.md` with the version rules and the checklist for every platform. Tags `vX.Y.Z` must equal the manifests' version and are protected from being moved or deleted.
