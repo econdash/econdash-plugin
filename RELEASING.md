@@ -22,6 +22,8 @@ CI fails when the two versions differ, when `CHANGELOG.md` has no section for th
 
 Claude Code keeps users on the installed `version` until it changes, so every release must raise it.
 
+`main` is not a staging branch. The README install commands for Claude Code (`/plugin marketplace add`) and Grok Build (`econdash@econdash-plugin`, or the repository URL) give new users the current `main`, not the latest tag; only Gemini CLI installs the latest release. Keep unfinished work on a branch and merge it into `main` only when it is ready for users, ideally together with the release commit.
+
 ## Tool descriptions
 
 `evals/tools-list.json` is a snapshot of the server's `instructions` and `tools/list`: names, titles, descriptions, input schemas and annotations. CI compares it with the live server on every push and every Monday. When the server changes a description, CI fails until the snapshot is updated in a commit. The git diff of this file between two tags is what changed for the model, and the stores must see it:
