@@ -1,0 +1,336 @@
+{
+  "instructions": "EconDash serves economic indicators from World Bank, IMF, FRED, Eurostat, ECB, OECD, WHO and other public sources for countries and regions. search_indicators finds the indicator slug that the data tools take as input. Countries and regions are ISO 3166-1 alpha-3 codes, listed by list_countries.",
+  "tools": [
+    {
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "noauth"
+          }
+        ]
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true,
+        "title": "Compare countries"
+      },
+      "description": "Returns one value of one indicator for up to 20 countries or regions: for the given year, or the latest observed value in each country when no year is given. Each value has its own period and chart link; projections are labelled. Codes without data are listed separately.",
+      "inputSchema": {
+        "properties": {
+          "countries": {
+            "description": "ISO3 codes of the countries or regions to compare.",
+            "items": {
+              "description": "ISO 3166-1 alpha-3 code, for example USA, DEU, ARG, or WLD for the world.",
+              "pattern": "^[A-Za-z]{3}$",
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Countries",
+            "type": "array"
+          },
+          "indicator": {
+            "description": "Indicator slug from search_indicators, for example cpi-inflation.",
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^[a-z0-9_-]+$",
+            "title": "Indicator",
+            "type": "string"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "maximum": 2100,
+                "minimum": 1800,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Calendar year. Omit for the latest observed value.",
+            "title": "Year"
+          }
+        },
+        "required": [
+          "indicator",
+          "countries"
+        ],
+        "title": "compare_countriesArguments",
+        "type": "object"
+      },
+      "name": "compare_countries",
+      "title": "Compare countries"
+    },
+    {
+      "_meta": {
+        "securitySchemes": [
+          {
+            "scopes": [
+              "econdash.read"
+            ],
+            "type": "oauth2"
+          }
+        ]
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true,
+        "title": "Get full indicator history"
+      },
+      "description": "Returns the whole history of one indicator for one country or region, up to 2500 values per call, for people signed in to EconDash with full data access; other signed-in accounts get as many values as get_indicator_series. Needs sign-in to EconDash. Without years: the history up to the latest observed value, with the nearest projection in next_projection. With start_year and/or end_year: the values in that range, the latest ones and truncated true when it holds more. Same fields as get_indicator_series. Country is an ISO 3166-1 alpha-3 code.",
+      "inputSchema": {
+        "properties": {
+          "country": {
+            "description": "ISO 3166-1 alpha-3 code, for example USA, DEU, ARG, or WLD for the world.",
+            "pattern": "^[A-Za-z]{3}$",
+            "title": "Country",
+            "type": "string"
+          },
+          "end_year": {
+            "anyOf": [
+              {
+                "maximum": 2100,
+                "minimum": 1800,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Last calendar year of the series; projections up to this year are included.",
+            "title": "End Year"
+          },
+          "indicator": {
+            "description": "Indicator slug from search_indicators, for example cpi-inflation.",
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^[a-z0-9_-]+$",
+            "title": "Indicator",
+            "type": "string"
+          },
+          "start_year": {
+            "anyOf": [
+              {
+                "maximum": 2100,
+                "minimum": 1800,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "First calendar year of the series.",
+            "title": "Start Year"
+          }
+        },
+        "required": [
+          "indicator",
+          "country"
+        ],
+        "title": "get_full_seriesArguments",
+        "type": "object"
+      },
+      "name": "get_full_series",
+      "title": "Get full indicator history"
+    },
+    {
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "noauth"
+          }
+        ]
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true,
+        "title": "Get indicator details"
+      },
+      "description": "Returns the description, unit, frequency, source, publisher, licence, attribution text, coverage in years and countries, and the time of the last data change for one indicator.",
+      "inputSchema": {
+        "properties": {
+          "indicator": {
+            "description": "Indicator slug from search_indicators, for example cpi-inflation.",
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^[a-z0-9_-]+$",
+            "title": "Indicator",
+            "type": "string"
+          }
+        },
+        "required": [
+          "indicator"
+        ],
+        "title": "get_indicator_detailsArguments",
+        "type": "object"
+      },
+      "name": "get_indicator_details",
+      "title": "Get indicator details"
+    },
+    {
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "noauth"
+          }
+        ]
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true,
+        "title": "Get indicator series"
+      },
+      "description": "Returns values of one indicator for one country or region. A call returns at most 30 annual, 40 quarterly, 120 monthly, 52 weekly, 250 daily values (about 30 years of annual data, 10 years of quarterly or monthly, one year of weekly or daily). Without years: the latest observed values. With start_year and/or end_year: the values in that range; when the range holds more, the latest ones are returned and truncated is true. With year: one value for that year (the last period of that year for monthly or quarterly data). Includes the unit, source, licence, the range of periods with data and a link to the EconDash chart page that shows the full history. Projections such as IMF forecasts are labelled; without end_year or year, the series stops at the latest observed value and the nearest projection comes in a separate next_projection field. Country is an ISO 3166-1 alpha-3 code.",
+      "inputSchema": {
+        "properties": {
+          "country": {
+            "description": "ISO 3166-1 alpha-3 code, for example USA, DEU, ARG, or WLD for the world.",
+            "pattern": "^[A-Za-z]{3}$",
+            "title": "Country",
+            "type": "string"
+          },
+          "end_year": {
+            "anyOf": [
+              {
+                "maximum": 2100,
+                "minimum": 1800,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Last calendar year of the series; projections up to this year are included.",
+            "title": "End Year"
+          },
+          "indicator": {
+            "description": "Indicator slug from search_indicators, for example cpi-inflation.",
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^[a-z0-9_-]+$",
+            "title": "Indicator",
+            "type": "string"
+          },
+          "start_year": {
+            "anyOf": [
+              {
+                "maximum": 2100,
+                "minimum": 1800,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "First calendar year of the series.",
+            "title": "Start Year"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "maximum": 2100,
+                "minimum": 1800,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Calendar year for a single value. Omit to get a series.",
+            "title": "Year"
+          }
+        },
+        "required": [
+          "indicator",
+          "country"
+        ],
+        "title": "get_indicator_seriesArguments",
+        "type": "object"
+      },
+      "name": "get_indicator_series",
+      "title": "Get indicator series"
+    },
+    {
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "noauth"
+          }
+        ]
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true,
+        "title": "List countries and regions"
+      },
+      "description": "Lists the countries and regional aggregates in EconDash as ISO 3166-1 alpha-3 codes with names. Regions include World Bank groups such as WLD (World) and EUU (European Union).",
+      "inputSchema": {
+        "properties": {},
+        "title": "list_countriesArguments",
+        "type": "object"
+      },
+      "name": "list_countries",
+      "title": "List countries and regions"
+    },
+    {
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "noauth"
+          }
+        ]
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true,
+        "title": "Search economic indicators"
+      },
+      "description": "Searches the EconDash catalogue of economic, financial, demographic and social indicators by keyword. Returns up to 25 matches with the slug, name, unit, frequency, source and years covered. The slug is the input for get_indicator_series, compare_countries and get_indicator_details. The catalogue has no series for individual shares or cryptocurrencies (only the Crypto Fear & Greed Index), tax rates, steel or the Baltic Dry Index.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 10,
+            "description": "Maximum number of results.",
+            "maximum": 25,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "query": {
+            "description": "Words to search for, for example 'inflation' or 'gdp per capita'.",
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_indicatorsArguments",
+        "type": "object"
+      },
+      "name": "search_indicators",
+      "title": "Search economic indicators"
+    }
+  ]
+}

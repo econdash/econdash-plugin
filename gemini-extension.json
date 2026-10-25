@@ -1,6 +1,6 @@
 {
   "name": "econdash",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "750+ indicators for 290+ countries: macroeconomics, markets, labor, demographics, real estate, commodities and energy, transport, healthcare, education and technology. From the World Bank, IMF, FRED, Eurostat, OECD and WHO, with sources.",
   "mcpServers": {
     "econdash": {

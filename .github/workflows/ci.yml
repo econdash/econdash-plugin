@@ -3,6 +3,8 @@ name: CI
 on:
   push:
   pull_request:
+  schedule:
+    - cron: "0 6 * * 1" # catches tool descriptions changed on the server between releases
 
 permissions:
   contents: read
@@ -46,6 +48,25 @@ jobs:
             || { echo "::error::plugin.json version $claude_version differs from gemini-extension.json version $gemini_version"; exit 1; }
           grep -q "^## $claude_version\$" CHANGELOG.md \
             || { echo "::error file=CHANGELOG.md::no section for version $claude_version"; exit 1; }
+          if [ "${GITHUB_REF_TYPE:-}" = tag ]; then
+            [ "$GITHUB_REF_NAME" = "v$claude_version" ] \
+              || { echo "::error::tag $GITHUB_REF_NAME does not match version $claude_version (expected v$claude_version)"; exit 1; }
+          fi
+
+      - name: Server tools match evals/tools-list.json
+        run: |
+          set -euo pipefail
+          mcp() {
+            curl -sS --fail --max-time 30 https://mcp.econdash.org/mcp -H 'Content-Type: application/json' \
+              -H 'Accept: application/json, text/event-stream' -H 'MCP-Protocol-Version: 2025-06-18' -d "$1" \
+              | sed -e '/^event:/d' -e 's/^data: //'
+          }
+          init=$(mcp '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"econdash-plugin-ci","version":"1"}}}')
+          tools=$(mcp '{"jsonrpc":"2.0","id":2,"method":"tools/list"}')
+          jq -nS --argjson init "$init" --argjson tools "$tools" \
+            '{instructions: $init.result.instructions, tools: ($tools.result.tools | sort_by(.name))}' > /tmp/tools-list.json
+          diff -u evals/tools-list.json /tmp/tools-list.json \
+            || { echo "::error file=evals/tools-list.json::the server's tools changed; commit the new snapshot and see RELEASING.md"; exit 1; }
 
       - name: Nothing executable, no symlinks, submodules or LFS
         run: |
