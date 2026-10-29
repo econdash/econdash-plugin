@@ -1,7 +1,7 @@
 {
   "name": "econdash",
   "displayName": "EconDash",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "750+ indicators in ten categories: macroeconomics, financial markets, labor, demographics, real estate, commodities and energy, transport and logistics, healthcare, education, technology and internet. 290+ countries and regions, from the World Bank, IMF, FRED, Eurostat, OECD, WHO and other public sources. Every figure comes with its source, licence and a link to the EconDash chart.",
   "author": {
     "name": "EconDash",

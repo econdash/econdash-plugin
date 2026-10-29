@@ -122,6 +122,7 @@ The server is shared, so it has rate limits. Clients that connect directly, such
 - [Terms of Service](https://econdash.org/docs/terms-of-service)
 - [Data licences](https://econdash.org/data-license)
 - Support: support@econdash.org
+- Security reports: [SECURITY.md](SECURITY.md)
 
 ## License
 
