@@ -52,6 +52,18 @@ jobs:
           gemini_version=$(jq -r .version gemini-extension.json)
           [ "$claude_version" = "$gemini_version" ] \
             || { echo "::error::plugin.json version $claude_version differs from gemini-extension.json version $gemini_version"; exit 1; }
+          # Antigravity reads .antigravity-plugin/plugin.json before the root plugin.json (the OpenAI package)
+          # and takes its servers from mcp_config.json
+          jq -e '. == {"mcpServers": {"econdash": {"serverUrl": "https://mcp.econdash.org/mcp"}}}' mcp_config.json \
+            || { echo "::error file=mcp_config.json::must declare exactly one server: econdash, serverUrl https://mcp.econdash.org/mcp"; exit 1; }
+          jq -e --arg v "$claude_version" --slurpfile c .claude-plugin/plugin.json '
+            ."$schema" == "https://antigravity.google/schemas/v1/plugin.json"
+            and .name == "econdash" and .displayName == "EconDash" and .version == $v
+            and .author == $c[0].author and .keywords == $c[0].keywords
+            and (.suggestedPrompts | length) <= 3
+            and (.logo | test("^assets/.+\\.png$"))
+          ' .antigravity-plugin/plugin.json \
+            || { echo "::error file=.antigravity-plugin/plugin.json::schema, name, version, author, keywords or logo differ from .claude-plugin/plugin.json"; exit 1; }
           grep -q "^## $claude_version\$" CHANGELOG.md \
             || { echo "::error file=CHANGELOG.md::no section for version $claude_version"; exit 1; }
           if [ "${GITHUB_REF_TYPE:-}" = tag ]; then

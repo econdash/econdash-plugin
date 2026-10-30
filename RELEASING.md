@@ -14,7 +14,7 @@ The server keeps its tools compatible between major releases: tools are not rena
 
 ## What a release is
 
-1. `version` in `.claude-plugin/plugin.json`, `gemini-extension.json` and `plugin.json` (the OpenAI package), the same in all three.
+1. `version` in `.claude-plugin/plugin.json`, `gemini-extension.json`, `plugin.json` (the OpenAI package) and `.antigravity-plugin/plugin.json`, the same in all four.
 2. A `## X.Y.Z` section in `CHANGELOG.md`, moved from `## Unreleased`.
 3. A git tag `vX.Y.Z` on that commit, and a GitHub Release for the tag.
 
@@ -38,7 +38,7 @@ To refresh the snapshot, run the commands of the CI step "Server tools match eva
 Write down how long each step took; the next release plan depends on it.
 
 1. Run the golden prompt set (`evals/golden-prompts.yaml`) and, if skills changed, the skill prompts (`evals/skill-prompts.yaml`) in at least one client. Results go into the release notes.
-2. Raise `version` in the three manifests, move `## Unreleased` to `## X.Y.Z` in `CHANGELOG.md`, commit, push to `main`, wait for green CI.
+2. Raise `version` in the four manifests, move `## Unreleased` to `## X.Y.Z` in `CHANGELOG.md`, commit, push to `main`, wait for green CI.
 3. Tag and publish the release:
 
    ```
@@ -58,7 +58,7 @@ Write down how long each step took; the next release plan depends on it.
    ```
 
    Then open the plugin and choose **Upload plugin to make changes**. Only one review can be active per plugin; to replace a package under review, cancel the review first.
-7. **Gemini CLI** users of a git install are offered the update when `main` moves; users of a release install get the GitHub Release marked **Latest**. The gallery crawls tagged repositories daily. Nothing to do beyond step 3.
+7. **Antigravity** (`agy plugin install https://github.com/econdash/econdash-plugin`) installs the current `main`, reading `.antigravity-plugin/plugin.json` and `mcp_config.json`; `agy plugin validate` must show `mcpServers 1`. **Gemini CLI** users of a git install are offered the update when `main` moves; users of a release install get the GitHub Release marked **Latest**. The gallery crawls tagged repositories daily. Nothing to do beyond step 3.
 8. **MCP Registry**: only if the server's `server.json` changed, publish it with `mcp-publisher publish`.
 9. If tools or sign-in changed, update the [MCP documentation](https://econdash.org/docs/mcp).
 

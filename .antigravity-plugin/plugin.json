@@ -1,0 +1,37 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "econdash",
+  "displayName": "EconDash",
+  "description": "750+ indicators for 290+ countries: macroeconomics, markets, labor, demographics, real estate, commodities and energy, transport, healthcare, education and technology. From the World Bank, IMF, FRED, Eurostat, OECD and WHO, with sources.",
+  "version": "0.3.1",
+  "logo": "assets/icon.png",
+  "suggestedPrompts": [
+    "Use EconDash to get Germany's GDP growth for the last ten years.",
+    "What does EconDash say about Japan's CPI inflation?",
+    "Pull Brazil's total fertility rate from EconDash for 2000 to 2024."
+  ],
+  "author": {
+    "name": "EconDash",
+    "url": "https://econdash.org"
+  },
+  "homepage": "https://econdash.org/docs/mcp",
+  "repository": "https://github.com/econdash/econdash-plugin",
+  "license": "MIT",
+  "keywords": [
+    "economics",
+    "statistics",
+    "open-data",
+    "gdp",
+    "inflation",
+    "financial-markets",
+    "labor",
+    "demographics",
+    "real-estate",
+    "energy",
+    "commodities",
+    "transport",
+    "healthcare",
+    "education",
+    "technology"
+  ]
+}

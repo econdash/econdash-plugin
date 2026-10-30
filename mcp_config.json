@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "econdash": {
+      "serverUrl": "https://mcp.econdash.org/mcp"
+    }
+  }
+}

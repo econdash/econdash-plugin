@@ -5,7 +5,8 @@ All notable changes to this plugin are listed here. Versions follow [Semantic Ve
 ## Unreleased
 
 - `plugin.json` and `mcp.json` (Agent Plugins 1.0): the package for ChatGPT and Codex, with the listing (name, subtitle, description, starter prompts, category, links, brand colours), review prompts and test cases, and release notes; the icon is `assets/icon.png`. CI checks it against the OpenAI listing limits and keeps its version equal to the other manifests.
-- `RELEASING.md`: three manifests share the version; how to build the ChatGPT ZIP; do not change the tag tracked by the Claude directory while a publish request is waiting.
+- `.antigravity-plugin/plugin.json` and `mcp_config.json`: the Antigravity manifest and server. Antigravity reads its own manifest before the root `plugin.json`; without them it would install the plugin without the EconDash server.
+- `RELEASING.md`: four manifests share the version; how to build the ChatGPT ZIP; do not change the tag tracked by the Claude directory while a publish request is waiting.
 
 ## 0.3.1
 
