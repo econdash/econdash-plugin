@@ -4,6 +4,9 @@ All notable changes to this plugin are listed here. Versions follow [Semantic Ve
 
 ## Unreleased
 
+- `.codex-plugin/plugin.json`: listing for ChatGPT and Codex (name, subtitle, description, starter prompts, category, links, brand colours, review test cases, release notes), with the icon at `assets/icon.png`. CI checks it against the OpenAI listing limits and keeps its version equal to the other manifests.
+- `RELEASING.md`: three manifests share the version; the ChatGPT package is the release's source ZIP; do not change the tag tracked by the Claude directory while a publish request is waiting.
+
 ## 0.3.1
 
 - `SECURITY.md`: how to report a vulnerability in the plugin, the MCP server or econdash.org; linked from the README.
