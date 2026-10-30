@@ -59,14 +59,15 @@ jobs:
               || { echo "::error::tag $GITHUB_REF_NAME does not match version $claude_version (expected v$claude_version)"; exit 1; }
           fi
 
-      - name: Codex manifest meets the OpenAI listing limits
+      - name: OpenAI package meets the listing limits
         shell: python3 {0}
         run: |
-          # Limits from developers.openai.com/plugins/deploy/submission and submission-errors (final submission).
+          # plugin.json and mcp.json are the Agent Plugins package the OpenAI portal reads. Limits from
+          # developers.openai.com/plugins/deploy/submission, submission-errors and the Plugin Creator skill.
           import json, re, struct, sys
           from pathlib import Path
 
-          m = json.loads(Path(".codex-plugin/plugin.json").read_text())
+          m = json.loads(Path("plugin.json").read_text())
           claude = json.loads(Path(".claude-plugin/plugin.json").read_text())
           tools = {t["name"] for t in json.loads(Path("evals/tools-list.json").read_text())["tools"]}
           errors = []
@@ -76,7 +77,7 @@ jobs:
                   errors.append(message)
 
           def line(value, limit):
-              return isinstance(value, str) and 0 < len(value) <= limit and "\n" not in value
+              return isinstance(value, str) and 0 < len(value.strip()) and len(value) <= limit and "\n" not in value
 
           def https(value):
               return isinstance(value, str) and value.startswith("https://") and len(value) <= 1024
@@ -90,26 +91,34 @@ jobs:
               high, low = sorted([luminance(a), luminance(b)], reverse=True)
               return (high + 0.05) / (low + 0.05)
 
-          for key in ("name", "version", "description", "keywords"):
+          check(m.get("$schema") == "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json", "$schema must be Agent Plugins 1.0.0")
+          check(set(m) <= {"$schema", "name", "version", "description", "author", "homepage", "repository",
+                           "license", "keywords", "extensions"}, "plugin.json: only Agent Plugins top-level keys")
+          for key in ("name", "version", "description", "keywords", "author"):
               check(m.get(key) == claude.get(key), f"{key} must equal .claude-plugin/plugin.json")
           check(len(m["description"]) <= 1024, "description: at most 1024 characters")
-          # The server is attached in the portal by URL; the package declares no servers, apps or hooks.
-          for key in ("mcpServers", "apps", "hooks", "screenshots"):
-              check(key not in m and key not in m.get("interface", {}), f"{key} must not be in the package")
-          check(m.get("skills") == "./skills/", "skills must be ./skills/")
+          check(json.loads(Path("mcp.json").read_text()) == {
+              "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+              "mcpServers": {"econdash": {"type": "streamable-http", "url": "https://mcp.econdash.org/mcp"}}},
+              "mcp.json must declare exactly one server: econdash, streamable-http, https://mcp.econdash.org/mcp")
+          check(not Path(".app.json").exists(), "no .app.json in a public package")
 
-          i = m.get("interface", {})
+          openai = m.get("extensions", {}).get("com.openai", {})
+          check(set(openai) <= {"interface", "review", "publication"}, "extensions.com.openai: interface, review, publication only (no apps)")
+          i = openai.get("interface", {})
           check(i.get("displayName") == "EconDash", "interface.displayName must be EconDash")
           check(line(i.get("shortDescription"), 30), "interface.shortDescription: one line, at most 30 characters")
           check(isinstance(i.get("longDescription"), str) and 0 < len(i["longDescription"]) <= 4000,
                 "interface.longDescription: at most 4000 characters")
-          check(line(i.get("developerName"), 80), "interface.developerName: one line, at most 80 characters")
-          check(i.get("category") in {"Productivity", "Creativity", "Developer Tools", "Business & Operations",
-                                      "Data & Analytics", "Communication", "Education & Research", "Security",
-                                      "Finance", "Healthcare", "Travel", "Entertainment", "Other"},
+          # The directory shows the verified developer identity; the package must not name another publisher.
+          check("developerName" not in i, "interface.developerName: leave it to the verified identity")
+          check(i.get("category") in {"Business & Operations", "Communication", "Creativity", "Data & Analytics",
+                                      "Developer Tools", "Education & Research", "Entertainment", "Finance",
+                                      "Healthcare", "Other", "Productivity", "Scientific Research", "Security", "Travel"},
                 "interface.category: not a portal category")
           caps = i.get("capabilities", [])
-          check(len(caps) <= 20 and all(line(c, 120) for c in caps), "interface.capabilities: at most 20, each one line of at most 120")
+          check(isinstance(caps, list) and len(caps) <= 20 and all(line(c, 120) for c in caps),
+                "interface.capabilities: at most 20, each one line of at most 120")
           for key in ("websiteURL", "supportURL", "privacyPolicyURL", "termsOfServiceURL"):
               check(https(i.get(key)), f"interface.{key}: HTTPS, at most 1024 characters")
           prompts = i.get("defaultPrompt", [])
@@ -120,7 +129,8 @@ jobs:
               color = i.get(key, "")
               check(bool(re.fullmatch(r"#[0-9A-Fa-f]{6}", color)) and contrast(color, background) >= 2,
                     f"interface.{key}: #RRGGBB with at least 2:1 contrast against {background}")
-          for key in ("logo", "composerIcon"):
+          check("screenshots" not in i, "interface.screenshots: only for plugins with their own UI")
+          for key, smallest in (("logo", 256), ("composerIcon", 48)):
               path = i.get(key, "")
               file = Path(path)
               if not (path.startswith("./") and path.endswith(".png") and file.is_file()):
@@ -128,26 +138,34 @@ jobs:
                   continue
               head = file.read_bytes()[:24]
               width, height = struct.unpack(">II", head[16:24])
-              check(head[:8] == b"\x89PNG\r\n\x1a\n" and width == height and 48 <= width <= 4096
+              check(head[:8] == b"\x89PNG\r\n\x1a\n" and width == height and smallest <= width <= 4096
                     and file.stat().st_size <= 5 * 1024 * 1024,
-                    f"interface.{key}: square PNG, 48 to 4096 px, at most 5 MiB")
+                    f"interface.{key}: square PNG, {smallest} to 4096 px, at most 5 MiB")
 
-          openai = m.get("extensions", {}).get("com.openai", {})
           review = openai.get("review", {})
           check(review.get("commerce") is False, "review.commerce must be false: no digital sales")
+          asked = review.get("prompts", [])
+          check(len(asked) <= 20 and all(isinstance(p, str) and p.strip() and len(p) <= 4000 for p in asked),
+                "review.prompts: at most 20 nonblank prompts of at most 4000 characters")
           cases = review.get("test_cases", {})
           positive, negative = cases.get("positive", []), cases.get("negative", [])
           check(len(positive) == 5 and len(negative) == 3, "review.test_cases: exactly 5 positive and 3 negative")
           for case in positive:
-              check(all(case.get(k) for k in ("description", "prompt", "tools_triggered", "expected_behavior"))
-                    and len(case["description"]) <= 4000 and set(case["tools_triggered"]) <= tools,
-                    f"positive case {case.get('prompt')!r}: description, prompt, expected_behavior and tools from evals/tools-list.json")
+              named = case.get("tools_triggered")
+              check(all(isinstance(case.get(k), str) and case[k].strip()
+                        for k in ("description", "prompt", "tools_triggered", "expected_behavior"))
+                    and len(case["description"]) <= 4000
+                    and {t.strip() for t in named.split(",")} <= tools,
+                    f"positive case {case.get('prompt')!r}: string description, prompt, expected_behavior and tools_triggered naming tools from evals/tools-list.json")
           for case in negative:
-              check(bool(case.get("description") and case.get("prompt")), "negative case: description and prompt")
-          check(isinstance(openai.get("publication", {}).get("release_notes"), str), "publication.release_notes is required")
+              check(all(isinstance(case.get(k), str) and case[k].strip() for k in ("description", "prompt")),
+                    "negative case: description and prompt")
+          publication = openai.get("publication", {})
+          check(isinstance(publication.get("release_notes"), str) and publication["release_notes"].strip(), "publication.release_notes is required")
+          check(isinstance(publication.get("countries", []), list), "publication.countries: a list of country codes")
 
           for error in errors:
-              print(f"::error file=.codex-plugin/plugin.json::{error}")
+              print(f"::error file=plugin.json::{error}")
           sys.exit(1 if errors else 0)
 
       - name: Server tools match evals/tools-list.json

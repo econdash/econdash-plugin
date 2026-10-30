@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "econdash": {
+      "type": "streamable-http",
+      "url": "https://mcp.econdash.org/mcp"
+    }
+  }
+}
