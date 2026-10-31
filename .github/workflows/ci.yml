@@ -64,6 +64,16 @@ jobs:
             and (.logo | test("^assets/.+\\.png$"))
           ' .antigravity-plugin/plugin.json \
             || { echo "::error file=.antigravity-plugin/plugin.json::schema, name, version, author, keywords or logo differ from .claude-plugin/plugin.json"; exit 1; }
+          # Cursor reads .cursor-plugin/plugin.json for the Marketplace card; skills/ and mcp.json are found by default
+          jq -e --arg v "$claude_version" --slurpfile c .claude-plugin/plugin.json --slurpfile g gemini-extension.json '
+            (keys - ["name", "displayName", "version", "description", "author", "homepage", "repository", "license", "keywords", "logo"]) == []
+            and .name == "econdash" and .displayName == "EconDash" and .version == $v
+            and .description == $g[0].description
+            and .author == $c[0].author and .keywords == $c[0].keywords and .homepage == $c[0].homepage
+            and .repository == $c[0].repository and .license == $c[0].license
+            and (.logo | test("^assets/.+\\.png$"))
+          ' .cursor-plugin/plugin.json && [ -f "$(jq -r .logo .cursor-plugin/plugin.json)" ] \
+            || { echo "::error file=.cursor-plugin/plugin.json::name, version, description, author, keywords, links or logo differ from the other manifests"; exit 1; }
           grep -q "^## $claude_version\$" CHANGELOG.md \
             || { echo "::error file=CHANGELOG.md::no section for version $claude_version"; exit 1; }
           if [ "${GITHUB_REF_TYPE:-}" = tag ]; then

@@ -1,0 +1,31 @@
+{
+  "name": "econdash",
+  "displayName": "EconDash",
+  "version": "0.3.1",
+  "description": "750+ indicators for 290+ countries: macroeconomics, markets, labor, demographics, real estate, commodities and energy, transport, healthcare, education and technology. From the World Bank, IMF, FRED, Eurostat, OECD and WHO, with sources.",
+  "author": {
+    "name": "EconDash",
+    "url": "https://econdash.org"
+  },
+  "homepage": "https://econdash.org/docs/mcp",
+  "repository": "https://github.com/econdash/econdash-plugin",
+  "license": "MIT",
+  "keywords": [
+    "economics",
+    "statistics",
+    "open-data",
+    "gdp",
+    "inflation",
+    "financial-markets",
+    "labor",
+    "demographics",
+    "real-estate",
+    "energy",
+    "commodities",
+    "transport",
+    "healthcare",
+    "education",
+    "technology"
+  ],
+  "logo": "assets/icon.png"
+}
