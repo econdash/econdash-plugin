@@ -2,8 +2,9 @@
 
 All notable changes to this plugin are listed here. Versions follow [Semantic Versioning](https://semver.org).
 
-## Unreleased
+## 0.4.1
 
+- `mcp.json` names the OAuth endpoints and the base scope: the OpenAI portal could not discover them with mixed authentication and offered no way to sign in.
 - `RELEASING.md`: the ChatGPT ZIP is not attached to the GitHub Release, because Gemini CLI would install it instead of the source.
 
 ## 0.4.0

@@ -10,7 +10,13 @@
             "type": "mixed",
             "client": {
               "mode": "cimd"
-            }
+            },
+            "authorizationUrl": "https://mcp.econdash.org/oauth/authorize",
+            "tokenUrl": "https://mcp.econdash.org/oauth/token",
+            "registrationUrl": "https://mcp.econdash.org/oauth/register",
+            "baseScopes": [
+              "econdash.read"
+            ]
           }
         }
       }

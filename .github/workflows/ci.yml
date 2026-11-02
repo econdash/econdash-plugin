@@ -122,8 +122,13 @@ jobs:
           check(json.loads(Path("mcp.json").read_text()) == {
               "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
               "mcpServers": {"econdash": {"type": "streamable-http", "url": "https://mcp.econdash.org/mcp",
-                  "extensions": {"com.openai": {"auth": {"type": "mixed", "client": {"mode": "cimd"}}}}}}},
-              "mcp.json must declare exactly one server: econdash, streamable-http, https://mcp.econdash.org/mcp, mixed auth with CIMD")
+                  "extensions": {"com.openai": {"auth": {"type": "mixed", "client": {"mode": "cimd"},
+                      # The portal does not discover these under mixed auth and offers no sign-in without them.
+                      "authorizationUrl": "https://mcp.econdash.org/oauth/authorize",
+                      "tokenUrl": "https://mcp.econdash.org/oauth/token",
+                      "registrationUrl": "https://mcp.econdash.org/oauth/register",
+                      "baseScopes": ["econdash.read"]}}}}}},
+              "mcp.json must declare exactly one server: econdash, streamable-http, https://mcp.econdash.org/mcp, mixed auth with CIMD and explicit OAuth URLs")
           check(not Path(".app.json").exists(), "no .app.json in a public package")
 
           openai = m.get("extensions", {}).get("com.openai", {})
