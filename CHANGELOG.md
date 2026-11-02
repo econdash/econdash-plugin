@@ -4,8 +4,11 @@ All notable changes to this plugin are listed here. Versions follow [Semantic Ve
 
 ## Unreleased
 
+## 0.4.0
+
 - `plugin.json` and `mcp.json` (Agent Plugins 1.0): the package for ChatGPT and Codex, with the listing (name, subtitle, description, starter prompts, category, links, brand colours), review prompts and test cases, and release notes; the icon is `assets/icon.png`. CI checks it against the OpenAI listing limits and keeps its version equal to the other manifests.
 - `.antigravity-plugin/plugin.json` and `mcp_config.json`: the Antigravity manifest and server. Antigravity reads its own manifest before the root `plugin.json`; without them it would install the plugin without the EconDash server.
+- `mcp.json` declares the OpenAI connection settings: five tools work without sign-in, `get_full_series` uses OAuth (`mixed`, client registration through CIMD).
 - `.cursor-plugin/plugin.json`: the Cursor Marketplace manifest (display name and logo for the listing, the same description as the Gemini extension). Cursor finds the skills in `skills/` and the server in `mcp.json`.
 - `RELEASING.md`: five manifests share the version; how to build the ChatGPT ZIP; do not change the tag tracked by the Claude directory while a publish request is waiting.
 

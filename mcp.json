@@ -3,7 +3,17 @@
   "mcpServers": {
     "econdash": {
       "type": "streamable-http",
-      "url": "https://mcp.econdash.org/mcp"
+      "url": "https://mcp.econdash.org/mcp",
+      "extensions": {
+        "com.openai": {
+          "auth": {
+            "type": "mixed",
+            "client": {
+              "mode": "cimd"
+            }
+          }
+        }
+      }
     }
   }
 }
