@@ -4,6 +4,8 @@ All notable changes to this plugin are listed here. Versions follow [Semantic Ve
 
 ## Unreleased
 
+- `RELEASING.md`: the ChatGPT ZIP is not attached to the GitHub Release, because Gemini CLI would install it instead of the source.
+
 ## 0.4.0
 
 - `plugin.json` and `mcp.json` (Agent Plugins 1.0): the package for ChatGPT and Codex, with the listing (name, subtitle, description, starter prompts, category, links, brand colours), review prompts and test cases, and release notes; the icon is `assets/icon.png`. CI checks it against the OpenAI listing limits and keeps its version equal to the other manifests.

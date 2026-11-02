@@ -54,8 +54,9 @@ Write down how long each step took; the next release plan depends on it.
 
    ```
    git archive --format=zip --prefix=econdash/ -o econdash-X.Y.Z.zip vX.Y.Z plugin.json mcp.json skills assets LICENSE
-   gh release upload vX.Y.Z econdash-X.Y.Z.zip
    ```
+
+   Do not attach this ZIP, or any other file, to the GitHub Release: Gemini CLI installs a release's single asset instead of its source, finds no `gemini-extension.json` in it, and the install fails.
 
    Then open the plugin and choose **Upload plugin to make changes**. Only one review can be active per plugin; to replace a package under review, cancel the review first.
 7. **Antigravity** (`agy plugin install https://github.com/econdash/econdash-plugin`) installs the current `main`, reading `.antigravity-plugin/plugin.json` and `mcp_config.json`; `agy plugin validate` must show `mcpServers 1`. **Gemini CLI** users of a git install are offered the update when `main` moves; users of a release install get the GitHub Release marked **Latest**. The gallery crawls tagged repositories daily. Nothing to do beyond step 3.
