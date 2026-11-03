@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "econdash",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "750+ indicators in ten categories: macroeconomics, financial markets, labor, demographics, real estate, commodities and energy, transport and logistics, healthcare, education, technology and internet. 290+ countries and regions, from the World Bank, IMF, FRED, Eurostat, OECD, WHO and other public sources. Every figure comes with its source, licence and a link to the EconDash chart.",
   "author": {
     "name": "EconDash",
@@ -58,6 +58,7 @@
       },
       "review": {
         "commerce": false,
+        "demo_recording_url": "https://econdash.org/demo/chatgpt-review.mp4",
         "test_cases": {
           "positive": [
             {
@@ -93,15 +94,15 @@
           ],
           "negative": [
             {
-              "description": "Live price of a single share. EconDash has no series for individual shares, so no EconDash tool should be called; the answer says EconDash has no share prices and may point to a market data source.",
+              "description": "Live price of a single share. EconDash has no series for individual shares. With the plugin not selected, no EconDash tool is called and no figure is presented as EconDash data. With @econdash selected, one catalogue lookup (search_indicators, no match) is acceptable and the answer says EconDash has no individual share prices. Data tools (get_indicator_series, get_full_series, compare_countries) must not be called.",
               "prompt": "What is Apple's stock price today?"
             },
             {
-              "description": "Live cryptocurrency price. EconDash has no cryptocurrency prices (only the Crypto Fear & Greed Index), so no EconDash tool should be called for the price; the answer says so instead of giving a number from EconDash.",
+              "description": "Live cryptocurrency price. EconDash has no cryptocurrency prices, only the Crypto Fear & Greed Index. With the plugin not selected, no EconDash tool is called and no figure is presented as EconDash data. With @econdash selected, one catalogue lookup (search_indicators, no match) is acceptable and the answer says EconDash has no cryptocurrency prices. Data tools (get_indicator_series, get_full_series, compare_countries) must not be called.",
               "prompt": "What is the bitcoin price right now?"
             },
             {
-              "description": "A tax rate. EconDash has no tax-rate series, so no EconDash tool should be called; the answer says EconDash does not cover tax rates and does not present a figure as EconDash data.",
+              "description": "A statutory tax rate. EconDash has no series of statutory tax rates. With the plugin not selected, no EconDash tool is called and no figure is presented as EconDash data. With @econdash selected, one catalogue lookup (search_indicators, which may list related tax indicators) is acceptable and the answer says EconDash does not cover this rate. Data tools (get_indicator_series, get_full_series, compare_countries) must not be called.",
               "prompt": "What is the capital gains tax rate in Saudi Arabia?"
             }
           ]

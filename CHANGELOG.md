@@ -2,6 +2,11 @@
 
 All notable changes to this plugin are listed here. Versions follow [Semantic Versioning](https://semver.org).
 
+## 0.4.2
+
+- `plugin.json`: the negative review cases describe what ChatGPT was measured to do, with the plugin selected and without it. Without it no EconDash tool is called; with it one catalogue lookup is acceptable and the answer says EconDash does not have the data.
+- `plugin.json`: `review.demo_recording_url` points to the walkthrough recording.
+
 ## 0.4.1
 
 - `mcp.json` names the OAuth endpoints and the base scope: the OpenAI portal could not discover them with mixed authentication and offered no way to sign in.
